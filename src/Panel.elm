@@ -14,9 +14,10 @@ view model =
             [ Svg.id "tiles"
             , Svg.width "800"
             , Svg.height "440"
-            , viewBox "0 0 800 440"
+
+            --            , viewBox "0 0 800 440"
             ]
-            (List.concat [ viewBackground, viewTracks ])
+            (List.concat [ viewBackground, viewTracks, viewTurnouts ])
         ]
 
 
@@ -123,21 +124,27 @@ viewTrackTile track =
 viewTrack : Track -> List (Svg msg)
 viewTrack track =
     case track.direction of
+        NS ->
+            viewTrackOrthog track
+
         EW ->
-            viewTrackEW track
+            viewTrackOrthog track
 
         NE ->
-            viewTrackNE track
+            viewTrackDiag track
+
+        SE ->
+            viewTrackDiag track
 
         SW ->
-            viewTrackSW track
+            viewTrackDiag track
 
-        _ ->
-            [ svg [] [] ]
+        NW ->
+            viewTrackDiag track
 
 
-viewTrackEW : Track -> List (Svg msg)
-viewTrackEW track =
+viewTrackOrthog : Track -> List (Svg msg)
+viewTrackOrthog track =
     let
         fillText =
             case track.state of
@@ -148,31 +155,43 @@ viewTrackEW track =
                     "none"
 
         x =
-            (track.x - 1) * 60 + 10
+            (track.x - 1) * 60 + 30 + 10
 
         y =
-            (track.y - 1) * 60 + 10 + 25
+            (track.y - 1) * 60 + 30 + 10
 
         coords =
             String.join " "
-                [ String.join "," [ String.fromInt x, String.fromInt y ]
-                , String.join "," [ String.fromInt (x + 60), String.fromInt y ]
-                , String.join "," [ String.fromInt (x + 60), String.fromInt (y + 10) ]
-                , String.join "," [ String.fromInt x, String.fromInt (y + 10) ]
-                , String.join "," [ String.fromInt x, String.fromInt y ]
+                [ String.join "," [ String.fromInt -30, String.fromInt 5 ]
+                , String.join "," [ String.fromInt 30, String.fromInt 5 ]
+                , String.join "," [ String.fromInt 30, String.fromInt -5 ]
+                , String.join "," [ String.fromInt -30, String.fromInt -5 ]
+                , String.join "," [ String.fromInt -30, String.fromInt 5 ]
                 ]
+
+        rotMatrix =
+            case track.direction of
+                NS ->
+                    "0 1 -1 0"
+
+                _ ->
+                    "1 0 0 1"
+
+        xform =
+            String.join " " [ "matrix(", rotMatrix, String.fromInt x, String.fromInt y, ")" ]
     in
     [ polyline
         [ fill fillText
         , stroke "black"
         , Svg.points coords
+        , transform xform
         ]
         []
     ]
 
 
-viewTrackNE : Track -> List (Svg msg)
-viewTrackNE track =
+viewTrackDiag : Track -> List (Svg msg)
+viewTrackDiag track =
     let
         fillText =
             case track.state of
@@ -183,59 +202,42 @@ viewTrackNE track =
                     "none"
 
         x =
-            (track.x - 1) * 60 + 10
+            (track.x - 1) * 60 + 30 + 10
 
         y =
-            (track.y - 1) * 60 + 10 + 25
+            (track.y - 1) * 60 + 30 + 10
 
         coords =
             String.join " "
-                [ String.join "," [ String.fromInt (x + 60), String.fromInt y ]
-                , String.join "," [ String.fromInt (x + 60), String.fromInt (y + 10) ]
-                , String.join "," [ String.fromInt (x + 25), String.fromInt (y - 25) ]
-                , String.join "," [ String.fromInt (x + 35), String.fromInt (y - 25) ]
-                , String.join "," [ String.fromInt (x + 60), String.fromInt y ]
+                [ String.join "," [ String.fromInt 5, String.fromInt -30 ]
+                , String.join "," [ String.fromInt 30, String.fromInt -5 ]
+                , String.join "," [ String.fromInt 30, String.fromInt 5 ]
+                , String.join "," [ String.fromInt -5, String.fromInt -30 ]
+                , String.join "," [ String.fromInt 5, String.fromInt -30 ]
                 ]
+
+        rotMatrix =
+            case track.direction of
+                SE ->
+                    "0 1 -1 0"
+
+                SW ->
+                    "-1 0 0 -1"
+
+                NW ->
+                    "0 -1 1 0"
+
+                _ ->
+                    "1 0 0 1"
+
+        xform =
+            String.join " " [ "matrix(", rotMatrix, String.fromInt x, String.fromInt y, ")" ]
     in
     [ polyline
         [ fill fillText
         , stroke "black"
         , Svg.points coords
-        ]
-        []
-    ]
-
-
-viewTrackSW : Track -> List (Svg msg)
-viewTrackSW track =
-    let
-        fillText =
-            case track.state of
-                Just _ ->
-                    "black"
-
-                Nothing ->
-                    "none"
-
-        x =
-            (track.x - 1) * 60 + 10
-
-        y =
-            (track.y - 1) * 60 + 10 + 25
-
-        coords =
-            String.join " "
-                [ String.join "," [ String.fromInt x, String.fromInt y ]
-                , String.join "," [ String.fromInt (x + 35), String.fromInt (y + 35) ]
-                , String.join "," [ String.fromInt (x + 25), String.fromInt (y + 35) ]
-                , String.join "," [ String.fromInt x, String.fromInt (y + 10) ]
-                , String.join "," [ String.fromInt x, String.fromInt y ]
-                ]
-    in
-    [ polyline
-        [ fill fillText
-        , stroke "black"
-        , Svg.points coords
+        , transform xform
         ]
         []
     ]
@@ -256,26 +258,24 @@ type alias Track =
 
 tracks : List Track
 tracks =
-    [ Track 1 4 EW (Just "101")
-
-    --    , Track 2 4 EW (Just "101")
-    , Track 2 4 EW Nothing
-    , Track 3 4 EW (Just "101")
-    , Track 5 3 EW (Just "201")
-    , Track 6 3 EW (Just "201")
-    , Track 7 3 EW (Just "202")
-    , Track 8 3 EW (Just "202")
-    , Track 9 3 SW (Just "401")
-    , Track 9 4 NE (Just "401")
-    , Track 10 4 SW (Just "401")
-    , Track 5 5 EW (Just "301")
-    , Track 6 5 EW (Just "301")
-    , Track 7 5 EW (Just "302")
-    , Track 8 5 EW (Just "302")
-    , Track 9 5 EW (Just "401")
-    , Track 11 5 EW (Just "401")
-    , Track 12 5 EW (Just "401")
-    , Track 13 5 EW (Just "401")
+    [ Track 1 4 EW Nothing
+    , Track 2 4 EW (Just "TCAA")
+    , Track 3 4 EW (Just "TCAA")
+    , Track 4 2 NS Nothing
+    , Track 4 3 NS (Just "TCBA")
+    , Track 7 3 EW (Just "TCBB")
+    , Track 8 3 EW (Just "TCBB")
+    , Track 9 3 SW (Just "TCDA")
+    , Track 9 4 NE (Just "TCDA")
+    , Track 10 4 SW (Just "TCDA")
+    , Track 5 5 EW (Just "TCCA")
+    , Track 6 5 EW (Just "TCCA")
+    , Track 7 5 EW (Just "TCCB")
+    , Track 8 5 EW (Just "TCCB")
+    , Track 9 5 EW (Just "TCDA")
+    , Track 11 5 EW (Just "TCDA")
+    , Track 12 5 EW (Just "TCDA")
+    , Track 13 5 EW (Just "TCDA")
     ]
 
 
@@ -283,38 +283,14 @@ tracks =
 -- Track Circuit State definitions
 
 
-viewTCs : List (Svg msg)
-viewTCs =
-    let
-        needTC : Track -> Bool
-        needTC track =
-            case track.state of
-                Just _ ->
-                    True
-
-                Nothing ->
-                    False
-
-        tcTiles =
-            List.filter needTC tracks
-    in
-    List.concat (List.map viewTC tcTiles)
-
-
 viewTC : Track -> List (Svg msg)
 viewTC track =
     let
-        x =
-            track.x
-
-        y =
-            track.y
-
-        getTC : Maybe String -> Maybe TCState
+        getTC : Maybe String -> Maybe CBUSState
         getTC state =
             case state of
                 Just value ->
-                    case Dict.get value trackCircuits of
+                    case Dict.get value cbusStates of
                         Just tcRecord ->
                             Just tcRecord
 
@@ -324,7 +300,7 @@ viewTC track =
                 Nothing ->
                     Nothing
 
-        getOB : Maybe TCState -> OneBit
+        getOB : Maybe CBUSState -> OneBit
         getOB tcState =
             case tcState of
                 Just value ->
@@ -334,21 +310,27 @@ viewTC track =
                     UNKN
     in
     case track.direction of
+        NS ->
+            viewTCOrthog track (getOB (getTC track.state))
+
         EW ->
-            viewTcEW x y (getOB (getTC track.state))
+            viewTCOrthog track (getOB (getTC track.state))
 
         NE ->
-            viewTcNE x y (getOB (getTC track.state))
+            viewTCDiag track (getOB (getTC track.state))
+
+        SE ->
+            viewTCDiag track (getOB (getTC track.state))
 
         SW ->
-            viewTcSW x y (getOB (getTC track.state))
+            viewTCDiag track (getOB (getTC track.state))
 
-        _ ->
-            [ svg [] [] ]
+        NW ->
+            viewTCDiag track (getOB (getTC track.state))
 
 
-viewTcEW : Int -> Int -> OneBit -> List (Svg msg)
-viewTcEW x y status =
+viewTCOrthog : Track -> OneBit -> List (Svg msg)
+viewTCOrthog track status =
     let
         fillText =
             case status of
@@ -359,39 +341,52 @@ viewTcEW x y status =
                     "white"
 
                 ONE ->
-                    "red"
+                    "cyan"
 
-        xPos =
-            (x - 1) * 60 + 10 + 7
+        x =
+            (track.x - 1) * 60 + 30 + 10
 
-        yPos =
-            (y - 1) * 60 + 10 + 25 + 3
+        y =
+            (track.y - 1) * 60 + 30 + 10
+
+        rotMatrix =
+            case track.direction of
+                NS ->
+                    "0 1 -1 0"
+
+                _ ->
+                    "1 0 0 1"
+
+        xform =
+            String.join " " [ "matrix(", rotMatrix, String.fromInt x, String.fromInt y, ")" ]
     in
     [ rect
-        [ Svg.x (String.fromInt xPos)
-        , Svg.y (String.fromInt yPos)
+        [ Svg.x "-23"
+        , Svg.y "-2"
         , Svg.width "16"
         , Svg.height "4"
         , rx "2"
         , fill fillText
         , stroke fillText
+        , transform xform
         ]
         []
     , rect
-        [ Svg.x (String.fromInt (xPos + 30))
-        , Svg.y (String.fromInt yPos)
+        [ Svg.x "7"
+        , Svg.y "-2"
         , Svg.width "16"
         , Svg.height "4"
         , rx "2"
         , fill fillText
         , stroke fillText
+        , transform xform
         ]
         []
     ]
 
 
-viewTcNE : Int -> Int -> OneBit -> List (Svg msg)
-viewTcNE x y status =
+viewTCDiag : Track -> OneBit -> List (Svg msg)
+viewTCDiag track status =
     let
         fillText =
             case status of
@@ -404,18 +399,32 @@ viewTcNE x y status =
                 ONE ->
                     "red"
 
-        xPos =
-            (x - 1) * 60 + 10 + 41
+        x =
+            (track.x - 1) * 60 + 30 + 10
 
-        yPos =
-            (y - 1) * 60 + 10 + 8
+        y =
+            (track.y - 1) * 60 + 30 + 10
+
+        rotMatrix =
+            case track.direction of
+                SE ->
+                    "-0.707 0.707 -0.707 -0.707"
+
+                SW ->
+                    "-0.707 -0.707 0.707 -0.707"
+
+                NW ->
+                    "0.707 -0.707 0.707 0.707"
+
+                _ ->
+                    "0.707 0.707 -0.707 0.707"
 
         xform =
-            String.join " " [ "matrix(0.7071 0.7071 -0.7071 0.7071", String.fromInt xPos, String.fromInt yPos, ")" ]
+            String.join " " [ "matrix(", rotMatrix, String.fromInt x, String.fromInt y, ")" ]
     in
     [ rect
-        [ Svg.x "0"
-        , Svg.y "0"
+        [ Svg.x "-8"
+        , Svg.y "-23.25"
         , Svg.width "16"
         , Svg.height "4"
         , rx "2"
@@ -464,29 +473,357 @@ viewTcSW x y status =
     ]
 
 
+
+-- Turnout Layout definitions
+
+
+viewTurnouts : List (Svg msg)
+viewTurnouts =
+    List.concat (List.map viewTurnoutTile turnouts)
+
+
+viewTurnoutTile : Turnout -> List (Svg msg)
+viewTurnoutTile turnout =
+    case turnout.state of
+        Just _ ->
+            List.concat [ viewTurnout turnout, viewLever turnout ]
+
+        Nothing ->
+            viewTurnout turnout
+
+
+viewTurnout : Turnout -> List (Svg msg)
+viewTurnout turnout =
+    case turnout.hand of
+        TOLeft ->
+            viewTOLeft turnout
+
+        TORight ->
+            viewTORight turnout
+
+        TOWye ->
+            viewTOWye turnout
+
+
+viewTOLeft : Turnout -> List (Svg msg)
+viewTOLeft turnout =
+    let
+        fillText =
+            case turnout.state of
+                Just _ ->
+                    "black"
+
+                Nothing ->
+                    "none"
+
+        x =
+            (turnout.x - 1) * 60 + 30 + 10
+
+        y =
+            (turnout.y - 1) * 60 + 30 + 10
+
+        rotMatrix =
+            case turnout.orientation of
+                TONorth ->
+                    "0 1 -1 0"
+
+                TOEast ->
+                    "-1 0 0 -1"
+
+                TOSouth ->
+                    "0 -1 1 0"
+
+                TOWest ->
+                    "1 0 0 1"
+
+        xform =
+            String.join " " [ "matrix(", rotMatrix, String.fromInt x, String.fromInt y, ")" ]
+    in
+    [ g
+        [ fill fillText
+        , stroke "black"
+        , transform xform
+        ]
+        [ polyline
+            [ Svg.points "-30,5 30,5 30,-5 -30,-5 -30,5"
+            ]
+            []
+        , polyline
+            [ Svg.points "-5,-30 5,-30 28,-7 18,-7 -5,-30"
+            ]
+            []
+        ]
+    ]
+
+
+viewTORight : Turnout -> List (Svg msg)
+viewTORight turnout =
+    let
+        fillText =
+            case turnout.state of
+                Just _ ->
+                    "black"
+
+                Nothing ->
+                    "none"
+
+        x =
+            (turnout.x - 1) * 60 + 30 + 10
+
+        y =
+            (turnout.y - 1) * 60 + 30 + 10
+
+        rotMatrix =
+            case turnout.orientation of
+                TONorth ->
+                    "0 1 -1 0"
+
+                TOEast ->
+                    "-1 0 0 -1"
+
+                TOSouth ->
+                    "0 -1 1 0"
+
+                TOWest ->
+                    "1 0 0 1"
+
+        xform =
+            String.join " " [ "matrix(", rotMatrix, String.fromInt x, String.fromInt y, ")" ]
+    in
+    [ g
+        [ fill fillText
+        , stroke "black"
+        , transform xform
+        ]
+        [ polyline
+            [ Svg.points "-30,5 30,5 30,-5 -30,-5 -30,5"
+            ]
+            []
+        , polyline
+            [ Svg.points "-5,30 5,30 28,7 18,7 -5,30"
+            ]
+            []
+        ]
+    ]
+
+
+viewTOWye : Turnout -> List (Svg msg)
+viewTOWye turnout =
+    let
+        fillText =
+            case turnout.state of
+                Just _ ->
+                    "black"
+
+                Nothing ->
+                    "none"
+
+        x =
+            (turnout.x - 1) * 60 + 30 + 10
+
+        y =
+            (turnout.y - 1) * 60 + 30 + 10
+
+        rotMatrix =
+            case turnout.orientation of
+                TONorth ->
+                    "0 1 -1 0"
+
+                TOEast ->
+                    "-1 0 0 -1"
+
+                TOSouth ->
+                    "0 -1 1 0"
+
+                TOWest ->
+                    "1 0 0 1"
+
+        xform =
+            String.join " " [ "matrix(", rotMatrix, String.fromInt x, String.fromInt y, ")" ]
+    in
+    [ g
+        [ fill fillText
+        , stroke "black"
+        , transform xform
+        ]
+        [ polyline
+            [ Svg.points "0,5 30,5 30,-5 0,-5 0,5"
+            ]
+            []
+        , polyline
+            [ Svg.points "-5,30 5,30 28,7 18,7 -5,30"
+            ]
+            []
+        , polyline
+            [ Svg.points "-5,-30 5,-30 28,-7 18,-7 -5,-30"
+            ]
+            []
+        ]
+    ]
+
+
+viewLever : Turnout -> List (Svg msg)
+viewLever turnout =
+    case turnout.hand of
+        TOLeft ->
+            viewLeverLeft turnout
+
+        TORight ->
+            viewLeverRight turnout
+
+        TOWye ->
+            viewLeverWye turnout
+
+
+viewLeverLeft : Turnout -> List (Svg msg)
+viewLeverLeft turnout =
+    let
+        getTO : Maybe String -> Maybe CBUSState
+        getTO state =
+            case state of
+                Just value ->
+                    case Dict.get value levers of
+                        Just toRecord ->
+                            Just toRecord
+
+                        Nothing ->
+                            Nothing
+
+                Nothing ->
+                    Nothing
+
+        getOB : Maybe CBUSState -> OneBit
+        getOB toState =
+            case toState of
+                Just value ->
+                    value.state
+
+                Nothing ->
+                    TOUnkn
+    in
+    case turnout.direction of
+        TO ->
+            viewTCOrthog track (getOB (getTO track.state))
+
+        EW ->
+            viewTCOrthog track (getOB (getTO track.state))
+
+        NE ->
+            viewTCDiag track (getOB (getTO track.state))
+
+        SE ->
+            viewTCDiag track (getOB (getTO track.state))
+
+        SW ->
+            viewTCDiag track (getOB (getTO track.state))
+
+        NW ->
+            viewTCDiag track (getOB (getTO track.state))
+
+
+getTurnoutState : Turnout -> TurnoutState
+getTurnoutState turnout =
+    TOUnkn
+
+
+viewLeverRight : Turnout -> List (Svg msg)
+viewLeverRight turnout =
+    [ svg [] [] ]
+
+
+viewLeverWye : Turnout -> List (Svg msg)
+viewLeverWye turnout =
+    [ svg [] [] ]
+
+
+type TurnoutHand
+    = TOLeft
+    | TORight
+    | TOWye
+
+
+type TurnoutFacing
+    = TONorth
+    | TOEast
+    | TOSouth
+    | TOWest
+
+
+type TurnoutState
+    = TOUnkn
+    | TOInTransit
+    | TONormal
+    | TOReverse
+    | TOError
+
+
+type alias Turnout =
+    { x : Int, y : Int, hand : TurnoutHand, orientation : TurnoutFacing, state : Maybe ( String, String ) }
+
+
+turnouts : List Turnout
+turnouts =
+    [ Turnout 1 1 TOLeft TONorth (Just ( "101N", "101R" ))
+    , Turnout 1 2 TOLeft TOEast (Just ( "101N", "101R" ))
+    , Turnout 1 3 TOLeft TOSouth (Just ( "101N", "101R" ))
+    , Turnout 1 4 TOLeft TOWest (Just ( "101N", "101R" ))
+    , Turnout 2 1 TORight TONorth (Just ( "102N", "102R" ))
+    , Turnout 2 2 TORight TOEast (Just ( "102N", "102R" ))
+    , Turnout 2 3 TORight TOSouth (Just ( "102N", "102R" ))
+    , Turnout 2 4 TORight TOWest (Just ( "102N", "102R" ))
+    , Turnout 3 1 TOWye TONorth (Just ( "103N", "103R" ))
+    , Turnout 3 2 TOWye TOEast (Just ( "103N", "103R" ))
+    , Turnout 3 3 TOWye TOSouth (Just ( "103N", "103R" ))
+    , Turnout 3 4 TOWye TOWest (Just ( "103N", "103R" ))
+    ]
+
+
+type alias LeverState =
+    { name : String, state : ( OneBit, OneBit ) }
+
+
+type alias LeverStateDict =
+    Dict String LeverState
+
+
+levers : LeverStateDict
+levers =
+    Dict.fromList
+
+
+
+-- CBUS states
+
+
 type OneBit
     = UNKN
     | ZERO
     | ONE
 
 
-type alias TCState =
+type alias CBUSState =
     { name : String, state : OneBit }
 
 
-type alias TCStateDict =
-    Dict String TCState
+type alias CBUSStateDict =
+    Dict String CBUSState
 
 
-trackCircuits : TCStateDict
-trackCircuits =
+cbusStates : CBUSStateDict
+cbusStates =
     Dict.fromList
-        [ ( "101", TCState "N5E3" UNKN )
-        , ( "201", TCState "N5E2" ZERO )
-        , ( "202", TCState "N6E2" ZERO )
-        , ( "301", TCState "N5E1" ONE )
-        , ( "302", TCState "N6E2" ONE )
-        , ( "401", TCState "N7E3" ZERO )
+        [ ( "TCAA", CBUSState "N5E3" UNKN )
+        , ( "TCBA", CBUSState "N5E2" ZERO )
+        , ( "TCBB", CBUSState "N6E2" ZERO )
+        , ( "TCCA", CBUSState "N5E1" ONE )
+        , ( "TCCB", CBUSState "N6E2" ONE )
+        , ( "TCDA", CBUSState "N7E3" ZERO )
+        , ( "101N", CBUSState "N5E6" UNKN )
+        , ( "101R", CBUSState "N5E7" UNKN )
+        , ( "102N", CBUSState "N6E6" ZERO )
+        , ( "102R", CBUSState "N6E7" ONE )
+        , ( "103N", CBUSState "N7E6" ONE )
+        , ( "103R", CBUSState "N7E7" ONE )
         ]
 
 
