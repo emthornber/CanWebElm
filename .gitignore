@@ -6,4 +6,4 @@ repl-temp-*
 elm.js
 
 # Editing files
-*.swp
+**/*.swp
