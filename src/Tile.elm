@@ -6,7 +6,7 @@
 -}
 
 
-module Panel exposing (main)
+module Tile exposing (main)
 
 import Dict exposing (Dict)
 import Html exposing (div, h1, text)
