@@ -1,7 +1,7 @@
 module Model exposing (..)
 
-import Dict exposing (Dict)
-import Panel exposing (Layout, layout)
+import Dict
+import Panel
 
 
 type alias Model =
@@ -42,7 +42,7 @@ type alias CBUSState =
 
 
 type alias CBUSStateDict =
-    Dict String CBUSState
+    Dict.Dict String CBUSState
 
 
 getOBState : Maybe String -> OneBit

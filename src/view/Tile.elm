@@ -8,11 +8,11 @@
 
 module Tile exposing (view)
 
-import Dict exposing (Dict)
+import Dict
 import Html
 import Html.Attributes as HtmlA
 import Model
-import Panel exposing (Layout)
+import Panel
 import Svg
 import Svg.Attributes as SvgA
 
@@ -43,7 +43,7 @@ view model =
 -- Background Tiles
 
 
-viewBackground : Layout -> List (Svg.Svg msg)
+viewBackground : Panel.Layout -> List (Svg.Svg msg)
 viewBackground layout =
     let
         start =

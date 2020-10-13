@@ -1,0 +1,20 @@
+{
+    "panel": {
+	"size": {
+	    "width": 13,
+	    "height": 7
+	},
+	"tiles": 60,
+	"colour": "#a4b887",
+	"margins": 10,
+	"border": 2,
+	"title": "CBUS Elm Demo"
+    },
+    "cbusstate": [
+	{
+	    "name": "TCAA",
+	    "event": "N5E3",
+	    "state": "UNKN"
+	}
+    ]
+}
