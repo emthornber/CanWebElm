@@ -1,4 +1,4 @@
-module Panel exposing (Layout, bkgFill, border, edge, layout, margin, panel, translateTile, window)
+module Panel exposing (Layout, border, edge, layout, margin, panel, translateTile, window)
 
 
 type alias Layout =
@@ -7,6 +7,7 @@ type alias Layout =
     , bkgFill : String
     , margins : Int
     , border : Int
+    , name : String
     }
 
 
@@ -17,6 +18,7 @@ layout =
     , bkgFill = "#a4b887"
     , margins = 10
     , border = 2
+    , name = "CBUS Elm Demo"
     }
 
 
@@ -60,11 +62,6 @@ translateTile coords =
             ((Tuple.second coords - 1) * layout.tiles) + (layout.tiles // 2) + layout.margins
     in
     String.join " " [ "translate(", String.fromInt x, String.fromInt y, ")" ]
-
-
-bkgFill : String
-bkgFill =
-    layout.bkgFill
 
 
 margin : String

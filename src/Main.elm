@@ -1,18 +1,22 @@
 module Main exposing (main)
 
 import Html
-import Model exposing (..)
-import Tile exposing (view)
+import Html.Attributes as HtmlA
+import Model
+import Tile
 
 
 
 -- temporary main code
 
 
-view : Model -> Html.Html msg
+view : Model.Model -> Html.Html msg
 view model =
-    Tile.view model
+    Html.div [ HtmlA.class "content" ]
+        [ Html.h1 [] [ Html.text "CanWeb" ]
+        , Tile.view model
+        ]
 
 
 main =
-    view initialModel
+    view Model.initialModel
