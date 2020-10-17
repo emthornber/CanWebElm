@@ -1,13 +1,14 @@
 {
-    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "CanWeb CBUS Elm",
     "definitions": {
-	"properties": {
-	    "name": {
-		"type": "string",
-		"description": "Name to be used as a reference and/or label on a tile"
-	    },
-	    "tile": {
+	"name": {
+	    "type": "string",
+	    "description": "Name to be used as a reference and/or label on a tile"
+	},
+	"tile": {
+	    "type": "object",
+	    "properties": {
 		"x-coord": {
 		    "type": "number",
 		    "description": "X position of a Tile in a Panel",
@@ -17,11 +18,31 @@
 		    "type": "number",
 		    "description": "Y position of a Tile in a Panel",
 		    "minimum": 1
+		},
+		"required": {
+		    "x-coord",
+		    "y-coord"
 		}
+	    }
+	},
+	"tostate": {
+	    "type": "object",
+	    "description": "Names of the CBUS inputs that indicate Normal and Reverse position of turnout",
+	    "properties": {
+		"normal": {
+		    "type": "string"
+		},
+		"reverse": {
+		    "type": "string"
+		}
+	    },
+	    "required": {
+		"normal",
+		"reverse"
 	    }
 	}
     },
-    "cbusstate": {
+    "cbusstates": {
 	"type": "object",
 	"properties": {
 	    "name": { "$ref": "#/definitions/name" },
@@ -41,7 +62,7 @@
 	    "state"
 	]
     },
-    "control": {
+    "controls": {
 	"type": "object",
 	"properties": {
 	    "tile": { "$ref": "#/definitions/tile" },
@@ -61,22 +82,23 @@
 	"required": [
 	    "tile",
 	    "name",
-	    "switch"
+	    "switch",
+	    "action",
+	    "tostate"
 	]
     },
     "panel": {
 	"type": "object",
 	"properties": {
-	    "size": {
-		"width": {
-		    "type": "number"
-		},
-		"height": {
-		    "type": "number"
-		},
-		"description": "Dimensions of panel in tiles"
+	    "width": {
+		"type": "number",
+		"description": "Width of panel in tiles"
 	    },
-	    "tiles" : {
+	    "height": {
+		"type": "number",
+		"description": "Height of panel in tiles"
+	    },
+	    "tilesize" : {
 		"type": "number",
 		"description": "Size of (square) tiles"
 	    },
@@ -98,7 +120,16 @@
 		"type": "string",
 		"description": "Name of layout represented on panel"
 	    }
-	}
+	},
+	"required": [
+	    "width",
+	    "height",
+	    "tilesize",
+	    "colour",
+	    "margins",
+	    "border",
+	    "title"
+	]
     },
     "track": {
 	"type": "object",
@@ -124,11 +155,10 @@
 	},
 	"required": [
 	    "tile",
-	    "name",
 	    "direction"
 	]
     },
-    "turnout": {
+    "turnouts": {
 	"type": "object",
 	"properties": {
 	    "tile": { "$ref": "#/definitions/tile" },
@@ -148,15 +178,7 @@
 		    "TOWest"
 		]
 	    },
-	    "tostate": {
-		"normal": {
-		    "type": "string"
-		},
-		"reverse": {
-		    "type": "string"
-		},
-		"description": "Names of the CBUS inputs that indicate Normal and Reverse position of turnout"
-	    }
+	    "tostate": { "$ref": "#/definitions/tostate" }
 	},
 	"required": [
 	    "tile",

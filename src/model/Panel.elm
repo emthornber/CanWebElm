@@ -1,8 +1,9 @@
-module Panel exposing (Layout, border, edge, layout, margin, panel, translateTile, window)
+module Panel exposing (Diagram, border, diagram, edge, margin, panel, translateTile, window)
 
 
-type alias Layout =
-    { size : ( Int, Int )
+type alias Diagram =
+    { width : Int
+    , height : Int
     , tiles : Int
     , bkgFill : String
     , margins : Int
@@ -11,9 +12,10 @@ type alias Layout =
     }
 
 
-layout : Layout
-layout =
-    { size = ( 13, 7 )
+diagram : Diagram
+diagram =
+    { width = 13
+    , height = 7
     , tiles = 60
     , bkgFill = "#a4b887"
     , margins = 10
@@ -25,50 +27,50 @@ layout =
 window : ( String, String )
 window =
     let
-        calc : Int -> Layout -> String
+        calc : Int -> Diagram -> String
         calc num dim =
             String.fromInt ((num * dim.tiles) + (2 * dim.margins))
     in
-    ( calc (Tuple.first layout.size) layout, calc (Tuple.second layout.size) layout )
+    ( calc diagram.width diagram, calc diagram.height diagram )
 
 
 edge : ( String, String )
 edge =
     let
-        calc : Int -> Layout -> String
+        calc : Int -> Diagram -> String
         calc num dim =
             String.fromInt ((num * dim.tiles) + (2 * dim.border))
     in
-    ( calc (Tuple.first layout.size) layout, calc (Tuple.second layout.size) layout )
+    ( calc diagram.width diagram, calc diagram.height diagram )
 
 
 panel : ( String, String )
 panel =
     let
-        calc : Int -> Layout -> String
+        calc : Int -> Diagram -> String
         calc num dim =
             String.fromInt (num * dim.tiles)
     in
-    ( calc (Tuple.first layout.size) layout, calc (Tuple.second layout.size) layout )
+    ( calc diagram.width diagram, calc diagram.height diagram )
 
 
 translateTile : ( Int, Int ) -> String
 translateTile coords =
     let
         x =
-            ((Tuple.first coords - 1) * layout.tiles) + (layout.tiles // 2) + layout.margins
+            ((Tuple.first coords - 1) * diagram.tiles) + (diagram.tiles // 2) + diagram.margins
 
         y =
-            ((Tuple.second coords - 1) * layout.tiles) + (layout.tiles // 2) + layout.margins
+            ((Tuple.second coords - 1) * diagram.tiles) + (diagram.tiles // 2) + diagram.margins
     in
     String.join " " [ "translate(", String.fromInt x, String.fromInt y, ")" ]
 
 
 margin : String
 margin =
-    String.fromInt layout.margins
+    String.fromInt diagram.margins
 
 
 border : String
 border =
-    String.fromInt (layout.margins - layout.border)
+    String.fromInt (diagram.margins - diagram.border)

@@ -1,13 +1,20 @@
 module Model exposing (..)
 
 import Dict
+import Json.Decode as Decode
+import Json.Decode.Pipeline exposing (..)
 import Panel
 
 
+type Status
+    = Loading
+    | Loaded
+
+
 type alias Model =
-    { cbus : CBUSStateDict
+    { panel : Panel.Diagram
+    , cbus : CBUSStateDict
     , sw : List Control
-    , panel : Panel.Layout
     , tr : List Track
     , to : List Turnout
     }
@@ -15,9 +22,9 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { cbus = cbusStates
+    { panel = Panel.diagram
+    , cbus = cbusStates
     , sw = controls
-    , panel = Panel.layout
     , tr = tracks
     , to = turnouts
     }
@@ -83,7 +90,7 @@ cbusStates =
         , ( "TCCA", CBUSState "N5E1" ONE )
         , ( "TCCB", CBUSState "N6E2" ONE )
         , ( "TCDA", CBUSState "N7E3" ZERO )
-        , ( "102", CBUSState "N6E5" UNKN )
+        , ( "101", CBUSState "N5E5" UNKN )
         , ( "101N", CBUSState "N5E6" UNKN )
         , ( "101R", CBUSState "N5E7" UNKN )
         , ( "102", CBUSState "N6E5" ZERO )

@@ -1,20 +1,620 @@
 {
     "panel": {
-	"size": {
-	    "width": 13,
-	    "height": 7
-	},
-	"tiles": 60,
+	"width": 13,
+	"height": 7,
+	"tilesize": 60,
 	"colour": "#a4b887",
 	"margins": 10,
 	"border": 2,
 	"title": "CBUS Elm Demo"
     },
-    "cbusstate": [
+    "cbusstates": [
 	{
 	    "name": "TCAA",
 	    "event": "N5E3",
 	    "state": "UNKN"
+	},
+	{
+	    "name": "TCBA",
+	    "event": "N5E2",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "TCBB",
+	    "event": "N6E2",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "TCCA",
+	    "event": "N5E1",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "TCCB",
+	    "event": "N6E2",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "TCDA",
+	    "event": "N7E3",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "101",
+	    "event": "N5E5",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "101N",
+	    "event": "N5E6",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "101R",
+	    "event": "N5E7",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "102",
+	    "event": "N6E5",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "102N",
+	    "event": "N6E6",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "102R",
+	    "event": "N6E7",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "103",
+	    "event": "N7E5",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "103N",
+	    "event": "N7E6",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "103R",
+	    "event": "N7E7",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "104",
+	    "event": "N8E5",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "104N",
+	    "event": "N8E6",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "104R",
+	    "event": "N8E7",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "105",
+	    "event": "N9E5",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "105N",
+	    "event": "N9E6",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "105R",
+	    "event": "N9E7",
+	    "state": "UNKN"
+	}
+    ],
+    "controls": [
+	{
+	    "tile": {
+		"x-coord": 6,
+		"y-coord": 5
+	    },
+	    "name": "101",
+	    "switch": "Toggle",
+	    "action": "101",
+	    "tostate": {
+		"normal": "101N",
+		"reverse": "101R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 7,
+		"y-coord": 5
+	    },
+	    "name": "102",
+	    "switch": "Toggle",
+	    "action": "102",
+	    "tostate": {
+		"normal": "102N",
+		"reverse": "102R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 8,
+		"y-coord": 5
+	    },
+	    "name": "103",
+	    "switch": "Toggle",
+	    "action": "103",
+	    "tostate": {
+		"normal": "103N",
+		"reverse": "103R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 9,
+		"y-coord": 5
+	    },
+	    "name": "104",
+	    "switch": "Toggle",
+	    "action": "104",
+	    "tostate": {
+		"normal": "104N",
+		"reverse": "104R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 10,
+		"y-coord": 5
+	    },
+	    "name": "105",
+	    "switch": "Toggle",
+	    "action": "105",
+	    "tostate": {
+		"normal": "105N",
+		"reverse": "105R"
+	    }
+	}
+    ],
+    "track": [
+	{
+	    "tile": {
+		"x-coord": 1,
+		"y-coord": 5
+	    },
+	    "direction": "EW"
+	},
+	{
+	    "tile": {
+		"x-coord": 2,
+		"y-coord": 5
+	    },
+	    "direction": "EW",
+	    "tcstate": "TCAA",
+	    "spot": "TCAA"
+	},
+	{
+	    "tile": {
+		"x-coord": 3,
+		"y-coord": 5
+	    },
+	    "direction": "EW",
+	    "tcstate": "TCBA",
+	    "spot": "TCBA"
+	},
+	{
+	    "tile": {
+		"x-coord": 4,
+		"y-coord": 5
+	    },
+	    "direction": "EW",
+	    "tcstate": "TCCA",
+	    "spot": "TCCA"
+	},
+	{
+	    "tile": {
+		"x-coord": 1,
+		"y-coord": 6
+	    },
+	    "direction": "NS"
+	},
+	{
+	    "tile": {
+		"x-coord": 2,
+		"y-coord": 6
+	    },
+	    "direction": "NS",
+	    "tcstate": "TCAA",
+	    "spot": "TCAA"
+	},
+	{
+	    "tile": {
+		"x-coord": 3,
+		"y-coord": 6
+	    },
+	    "direction": "NS",
+	    "tcstate": "TCBA",
+	    "spot": "TCBA"
+	},
+	{
+	    "tile": {
+		"x-coord": 4,
+		"y-coord": 6
+	    },
+	    "direction": "EW",
+	    "tcstate": "TCCA",
+	    "spot": "TCCA"
+	},
+	{
+	    "tile": {
+		"x-coord": 1,
+		"y-coord": 7
+	    },
+	    "direction": "NE"
+	},
+	{
+	    "tile": {
+		"x-coord": 1,
+		"y-coord": 7
+	    },
+	    "direction": "SE"
+	},
+	{
+	    "tile": {
+		"x-coord": 1,
+		"y-coord": 7
+	    },
+	    "direction": "SW"
+	},
+	{
+	    "tile": {
+		"x-coord": 1,
+		"y-coord": 7
+	    },
+	    "direction": "NW",
+	    "spot": "TCBA"
+	},
+	{
+	    "tile": {
+		"x-coord": 2,
+		"y-coord": 7
+	    },
+	    "direction": "NE",
+	    "tcstate": "TCAA",
+	    "spot": "TCAA"
+	},
+	{
+	    "tile": {
+		"x-coord": 2,
+		"y-coord": 7
+	    },
+	    "direction": "SE",
+	    "tcstate": "TCAA"
+	},
+	{
+	    "tile": {
+		"x-coord": 2,
+		"y-coord": 7
+	    },
+	    "direction": "SW",
+	    "tcstate": "TCAA"
+	},
+	{
+	    "tile": {
+		"x-coord": 2,
+		"y-coord": 7
+	    },
+	    "direction": "NW",
+	    "tcstate": "TCAA"
+	},
+	{
+	    "tile": {
+		"x-coord": 3,
+		"y-coord": 7
+	    },
+	    "direction": "NE",
+	    "tcstate": "TCBA"
+	},
+	{
+	    "tile": {
+		"x-coord": 3,
+		"y-coord": 7
+	    },
+	    "direction": "SE",
+	    "tcstate": "TCBA",
+	    "spot": "TCBA"
+	},
+	{
+	    "tile": {
+		"x-coord": 3,
+		"y-coord": 7
+	    },
+	    "direction": "SW",
+	    "tcstate": "TCBA"
+	},
+	{
+	    "tile": {
+		"x-coord": 3,
+		"y-coord": 7
+	    },
+	    "direction": "NW",
+	    "tcstate": "TCBA"
+	},
+	{
+	    "tile": {
+		"x-coord": 4,
+		"y-coord": 7
+	    },
+	    "direction": "NE",
+	    "tcstate": "TCBA"
+	},
+	{
+	    "tile": {
+		"x-coord": 4,
+		"y-coord": 7
+	    },
+	    "direction": "SE",
+	    "tcstate": "TCCA"
+	},
+	{
+	    "tile": {
+		"x-coord": 4,
+		"y-coord": 7
+	    },
+	    "direction": "SW",
+	    "tcstate": "TCCA",
+	    "spot": "TCBA"
+	},
+	{
+	    "tile": {
+		"x-coord": 4,
+		"y-coord": 7
+	    },
+	    "direction": "NW",
+	    "tcstate": "TCCA"
+	}
+    ],
+    "turnouts": [
+	{
+	    "tile": {
+		"x-coord": 1,
+		"y-coord": 1
+	    },
+	    "name": "111",
+	    "hand": "TOLeft",
+	    "orientation": "TOWest"
+	},
+	{
+	    "tile": {
+		"x-coord": 2,
+		"y-coord": 1
+	    },
+	    "name": "121",
+	    "hand": "TOLeft",
+	    "orientation": "TONorth",
+	    "tostate": {
+		"normal": "101N",
+		"reverse": "101R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 3,
+		"y-coord": 1
+	    },
+	    "name": "121",
+	    "hand": "TOLeft",
+	    "orientation": "TOEast",
+	    "tostate": {
+		"normal": "102N",
+		"reverse": "102R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 4,
+		"y-coord": 1
+	    },
+	    "name": "121",
+	    "hand": "TOLeft",
+	    "orientation": "TOSouth",
+	    "tostate": {
+		"normal": "103N",
+		"reverse": "103R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 5,
+		"y-coord": 1
+	    },
+	    "name": "121",
+	    "hand": "TOLeft",
+	    "orientation": "TOWest",
+	    "tostate": {
+		"normal": "105N",
+		"reverse": "105R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 1,
+		"y-coord": 2
+	    },
+	    "name": "131",
+	    "hand": "TORight",
+	    "orientation": "TOWest"
+	},
+	{
+	    "tile": {
+		"x-coord": 2,
+		"y-coord": 2
+	    },
+	    "name": "131",
+	    "hand": "TORight",
+	    "orientation": "TONorth",
+	    "tostate": {
+		"normal": "101N",
+		"reverse": "101R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 3,
+		"y-coord": 2
+	    },
+	    "name": "131",
+	    "hand": "TORight",
+	    "orientation": "TOEast",
+	    "tostate": {
+		"normal": "102N",
+		"reverse": "102R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 4,
+		"y-coord": 2
+	    },
+	    "name": "131",
+	    "hand": "TORight",
+	    "orientation": "TOSouth",
+	    "tostate": {
+		"normal": "103N",
+		"reverse": "103R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 6,
+		"y-coord": 4
+	    },
+	    "name": "101",
+	    "hand": "TORight",
+	    "orientation": "TOWest",
+	    "tostate": {
+		"normal": "101N",
+		"reverse": "101R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 7,
+		"y-coord": 4
+	    },
+	    "name": "102",
+	    "hand": "TORight",
+	    "orientation": "TOWest",
+	    "tostate": {
+		"normal": "102N",
+		"reverse": "102R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 8,
+		"y-coord": 4
+	    },
+	    "name": "103",
+	    "hand": "TORight",
+	    "orientation": "TOWest",
+	    "tostate": {
+		"normal": "103N",
+		"reverse": "103R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 9,
+		"y-coord": 4
+	    },
+	    "name": "104",
+	    "hand": "TORight",
+	    "orientation": "TOWest",
+	    "tostate": {
+		"normal": "104N",
+		"reverse": "104R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 10,
+		"y-coord": 4
+	    },
+	    "name": "105",
+	    "hand": "TORight",
+	    "orientation": "TOWest",
+	    "tostate": {
+		"normal": "105N",
+		"reverse": "105R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 1,
+		"y-coord": 3
+	    },
+	    "name": "141",
+	    "hand": "TOWye",
+	    "orientation": "TOWest"
+	},
+	{
+	    "tile": {
+		"x-coord": 2,
+		"y-coord": 3
+	    },
+	    "name": "141",
+	    "hand": "TOWye",
+	    "orientation": "TONorth",
+	    "tostate": {
+		"normal": "101N",
+		"reverse": "101R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 3,
+		"y-coord": 3
+	    },
+	    "name": "141",
+	    "hand": "TOWye",
+	    "orientation": "TOEast",
+	    "tostate": {
+		"normal": "102N",
+		"reverse": "102R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 4,
+		"y-coord": 3
+	    },
+	    "name": "141",
+	    "hand": "TOWye",
+	    "orientation": "TOSouth",
+	    "tostate": {
+		"normal": "103N",
+		"reverse": "103R"
+	    }
+	},
+	{
+	    "tile": {
+		"x-coord": 5,
+		"y-coord": 3
+	    },
+	    "name": "141",
+	    "hand": "TOWye",
+	    "orientation": "TOWest",
+	    "tostate": {
+		"normal": "105N",
+		"reverse": "105R"
+	    }
 	}
     ]
 }

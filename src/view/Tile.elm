@@ -20,7 +20,7 @@ import Svg.Attributes as SvgA
 view : Model.Model -> Html.Html msg
 view model =
     Html.div [ HtmlA.class "panel" ]
-        [ Html.h2 [] [ Html.text Panel.layout.name ]
+        [ Html.h2 [] [ Html.text Panel.diagram.name ]
         , Svg.svg
             [ SvgA.id "tiles"
             , SvgA.width (Tuple.first Panel.window)
@@ -43,23 +43,23 @@ view model =
 -- Background Tiles
 
 
-viewBackground : Panel.Layout -> List (Svg.Svg msg)
-viewBackground layout =
+viewBackground : Panel.Diagram -> List (Svg.Svg msg)
+viewBackground diagram =
     let
         start =
-            String.fromInt layout.margins
+            String.fromInt diagram.margins
 
         xStop =
-            String.fromInt (layout.margins + Tuple.first layout.size * layout.tiles)
+            String.fromInt (diagram.margins + diagram.width * diagram.tiles)
 
         yStop =
-            String.fromInt (layout.margins + Tuple.second layout.size * layout.tiles)
+            String.fromInt (diagram.margins + diagram.height * diagram.tiles)
 
         xGrid : Int -> List (Svg.Svg msg)
         xGrid linenum =
             let
                 yBoth =
-                    String.fromInt (layout.margins + linenum * layout.tiles)
+                    String.fromInt (diagram.margins + linenum * diagram.tiles)
             in
             [ Svg.line
                 [ SvgA.x1 start, SvgA.y1 yBoth, SvgA.x2 xStop, SvgA.y2 yBoth ]
@@ -70,7 +70,7 @@ viewBackground layout =
         yGrid linenum =
             let
                 xBoth =
-                    String.fromInt (layout.margins + linenum * layout.tiles)
+                    String.fromInt (diagram.margins + linenum * diagram.tiles)
             in
             [ Svg.line
                 [ SvgA.x1 xBoth, SvgA.y1 start, SvgA.x2 xBoth, SvgA.y2 yStop ]
@@ -92,15 +92,15 @@ viewBackground layout =
         , SvgA.width (Tuple.first Panel.panel)
         , SvgA.height (Tuple.second Panel.panel)
         , SvgA.rx "0"
-        , SvgA.fill Panel.layout.bkgFill
+        , SvgA.fill Panel.diagram.bkgFill
         ]
         []
     , Svg.g
         [ SvgA.stroke "black"
         ]
         (List.concat
-            [ List.concatMap xGrid <| List.range 1 (Tuple.second layout.size - 1)
-            , List.concatMap yGrid <| List.range 1 (Tuple.first layout.size - 1)
+            [ List.concatMap xGrid <| List.range 1 (diagram.height - 1)
+            , List.concatMap yGrid <| List.range 1 (diagram.width - 1)
             ]
         )
     ]
@@ -840,13 +840,25 @@ viewKnob switch =
 
                 Model.ONE ->
                     "rotate(45)"
+
+        knobColour : Model.OneBit -> String
+        knobColour action =
+            case action of
+                Model.UNKN ->
+                    "black"
+
+                Model.ZERO ->
+                    "white"
+
+                Model.ONE ->
+                    "white"
     in
     [ Svg.g
         [ SvgA.transform (Panel.translateTile switch.coords)
         ]
         [ Svg.polyline
             [ SvgA.fill "none"
-            , SvgA.stroke "white"
+            , SvgA.stroke (knobColour <| Model.getOBState switch.action)
             , SvgA.strokeLinecap "round"
             , SvgA.strokeWidth "0.75"
             , SvgA.points "0,-9 5,-2 2,-2 2,8 -2,8 -2,-2 -5,-2 0,-9"
