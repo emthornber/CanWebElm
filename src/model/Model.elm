@@ -1,33 +1,84 @@
 module Model exposing (..)
 
 import Dict
+import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Panel
 
 
 type Status
-    = Loading
+    = Failure String
+    | Loading
     | Loaded
 
 
+type Msg
+    = LoadLayout (Result Http.Error Layout)
+
+
 type alias Model =
+    { status : Status
+    , layout : Maybe Layout
+    }
+
+
+type alias Layout =
     { panel : Panel.Diagram
-    , cbus : CBUSStateDict
     , sw : List Control
     , tr : List Track
     , to : List Turnout
+    , cbus : CBUSStateDict
     }
 
 
 initialModel : Model
 initialModel =
-    { panel = Panel.diagram
-    , cbus = cbusStates
+    { status = Loading
+    , layout = Nothing
+    }
+
+
+initialLayout : Layout
+initialLayout =
+    { panel = Panel.defaultDiagram
     , sw = controls
     , tr = tracks
     , to = turnouts
+    , cbus = Dict.empty
     }
+
+
+
+-- Helper function to translate tile row and column numbers into x y coordinates
+
+
+translateTile : ( Int, Int ) -> String
+translateTile coords =
+    let
+        tiles =
+            case initialModel.layout of
+                Just layout ->
+                    layout.panel.tiles
+
+                Nothing ->
+                    initialLayout.panel.tiles
+
+        margins =
+            case initialModel.layout of
+                Just layout ->
+                    layout.panel.margins
+
+                Nothing ->
+                    initialLayout.panel.margins
+
+        x =
+            ((Tuple.first coords - 1) * tiles) + (tiles // 2) + margins
+
+        y =
+            ((Tuple.second coords - 1) * tiles) + (tiles // 2) + margins
+    in
+    String.join " " [ "translate(", String.fromInt x, String.fromInt y, ")" ]
 
 
 
@@ -45,21 +96,21 @@ type alias TwoBit =
 
 
 type alias CBUSState =
-    { event : String, state : OneBit }
+    { event : Maybe String, state : OneBit }
 
 
 type alias CBUSStateDict =
     Dict.Dict String CBUSState
 
 
-getOBState : Maybe String -> OneBit
-getOBState name =
+getOBState : Maybe String -> CBUSStateDict -> OneBit
+getOBState name cbus =
     let
         getState : Maybe String -> Maybe CBUSState
         getState value =
             case value of
                 Just key ->
-                    case Dict.get key cbusStates of
+                    case Dict.get key cbus of
                         Just record ->
                             Just record
 
@@ -84,27 +135,27 @@ getOBState name =
 cbusStates : CBUSStateDict
 cbusStates =
     Dict.fromList
-        [ ( "TCAA", CBUSState "N5E3" UNKN )
-        , ( "TCBA", CBUSState "N5E2" ZERO )
-        , ( "TCBB", CBUSState "N6E2" ZERO )
-        , ( "TCCA", CBUSState "N5E1" ONE )
-        , ( "TCCB", CBUSState "N6E2" ONE )
-        , ( "TCDA", CBUSState "N7E3" ZERO )
-        , ( "101", CBUSState "N5E5" UNKN )
-        , ( "101N", CBUSState "N5E6" UNKN )
-        , ( "101R", CBUSState "N5E7" UNKN )
-        , ( "102", CBUSState "N6E5" ZERO )
-        , ( "102N", CBUSState "N6E6" ONE )
-        , ( "102R", CBUSState "N6E7" ZERO )
-        , ( "103", CBUSState "N6E5" ONE )
-        , ( "103N", CBUSState "N7E6" ZERO )
-        , ( "103R", CBUSState "N7E7" ONE )
-        , ( "104", CBUSState "N6E5" ONE )
-        , ( "104N", CBUSState "N7E6" ZERO )
-        , ( "104R", CBUSState "N7E7" ZERO )
-        , ( "105", CBUSState "N6E5" ONE )
-        , ( "105N", CBUSState "N7E6" ONE )
-        , ( "105R", CBUSState "N7E7" ONE )
+        [ ( "TCAA", CBUSState (Just "N5E3") UNKN )
+        , ( "TCBA", CBUSState (Just "N5E2") ZERO )
+        , ( "TCBB", CBUSState (Just "N6E2") ZERO )
+        , ( "TCCA", CBUSState (Just "N5E1") ONE )
+        , ( "TCCB", CBUSState (Just "N6E2") ONE )
+        , ( "TCDA", CBUSState (Just "N7E3") ZERO )
+        , ( "101", CBUSState (Just "N5E5") UNKN )
+        , ( "101N", CBUSState (Just "N5E6") UNKN )
+        , ( "101R", CBUSState (Just "N5E7") UNKN )
+        , ( "102", CBUSState (Just "N6E5") ZERO )
+        , ( "102N", CBUSState (Just "N6E6") ONE )
+        , ( "102R", CBUSState (Just "N6E7") ZERO )
+        , ( "103", CBUSState (Just "N6E5") ONE )
+        , ( "103N", CBUSState (Just "N7E6") ZERO )
+        , ( "103R", CBUSState (Just "N7E7") ONE )
+        , ( "104", CBUSState (Just "N6E5") ONE )
+        , ( "104N", CBUSState (Just "N7E6") ZERO )
+        , ( "104R", CBUSState (Just "N7E7") ZERO )
+        , ( "105", CBUSState (Just "N6E5") ONE )
+        , ( "105N", CBUSState (Just "N7E6") ONE )
+        , ( "105R", CBUSState (Just "N7E7") ONE )
         ]
 
 

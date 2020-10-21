@@ -17,25 +17,42 @@ import Svg
 import Svg.Attributes as SvgA
 
 
-view : Model.Model -> Html.Html msg
+view : Model.Model -> Html.Html Model.Msg
 view model =
+    case model.layout of
+        Just layout ->
+            viewLayout layout
+
+        Nothing ->
+            viewLoading
+
+
+viewLayout : Model.Layout -> Html.Html Model.Msg
+viewLayout layout =
     Html.div [ HtmlA.class "panel" ]
-        [ Html.h2 [] [ Html.text Panel.diagram.name ]
+        [ Html.h2 [] [ Html.text layout.panel.name ]
         , Svg.svg
             [ SvgA.id "tiles"
-            , SvgA.width (Tuple.first Panel.window)
-            , SvgA.height (Tuple.second Panel.window)
+            , SvgA.width (Tuple.first (Panel.window layout.panel))
+            , SvgA.height (Tuple.second (Panel.window layout.panel))
             ]
             (List.concat
-                [ viewBackground model.panel
-                , viewTracks
-                , viewTrackCircuits
-                , viewSpots
-                , viewTurnouts
-                , viewLevers
-                , viewControls
+                [ viewBackground layout.panel
+                , viewTracks layout.tr
+                , viewTrackCircuits layout
+                , viewSpots layout
+                , viewTurnouts layout.to
+                , viewLevers layout
+                , viewControls layout
                 ]
             )
+        ]
+
+
+viewLoading : Html.Html Model.Msg
+viewLoading =
+    Html.div [ HtmlA.class "panel" ]
+        [ Html.h2 [] [ Html.text "Loading ..." ]
         ]
 
 
@@ -43,7 +60,7 @@ view model =
 -- Background Tiles
 
 
-viewBackground : Panel.Diagram -> List (Svg.Svg msg)
+viewBackground : Panel.Diagram -> List (Svg.Svg Model.Msg)
 viewBackground diagram =
     let
         start =
@@ -55,7 +72,7 @@ viewBackground diagram =
         yStop =
             String.fromInt (diagram.margins + diagram.height * diagram.tiles)
 
-        xGrid : Int -> List (Svg.Svg msg)
+        xGrid : Int -> List (Svg.Svg Model.Msg)
         xGrid linenum =
             let
                 yBoth =
@@ -66,7 +83,7 @@ viewBackground diagram =
                 []
             ]
 
-        yGrid : Int -> List (Svg.Svg msg)
+        yGrid : Int -> List (Svg.Svg Model.Msg)
         yGrid linenum =
             let
                 xBoth =
@@ -78,21 +95,21 @@ viewBackground diagram =
             ]
     in
     [ Svg.rect
-        [ SvgA.x Panel.border
-        , SvgA.y Panel.border
-        , SvgA.width (Tuple.first Panel.edge)
-        , SvgA.height (Tuple.second Panel.edge)
+        [ SvgA.x (Panel.border diagram)
+        , SvgA.y (Panel.border diagram)
+        , SvgA.width (Tuple.first (Panel.edge diagram))
+        , SvgA.height (Tuple.second (Panel.edge diagram))
         , SvgA.rx "0"
         , SvgA.fill "black"
         ]
         []
     , Svg.rect
-        [ SvgA.x Panel.margin
-        , SvgA.y Panel.margin
-        , SvgA.width (Tuple.first Panel.panel)
-        , SvgA.height (Tuple.second Panel.panel)
+        [ SvgA.x (Panel.margin diagram)
+        , SvgA.y (Panel.margin diagram)
+        , SvgA.width (Tuple.first (Panel.panel diagram))
+        , SvgA.height (Tuple.second (Panel.panel diagram))
         , SvgA.rx "0"
-        , SvgA.fill Panel.diagram.bkgFill
+        , SvgA.fill diagram.bkgFill
         ]
         []
     , Svg.g
@@ -120,12 +137,12 @@ trackFill track =
             "none"
 
 
-viewTracks : List (Svg.Svg msg)
-viewTracks =
-    List.concat <| List.map viewTrack Model.tracks
+viewTracks : List Model.Track -> List (Svg.Svg Model.Msg)
+viewTracks tracks =
+    List.concat <| List.map viewTrack tracks
 
 
-viewTrack : Model.Track -> List (Svg.Svg msg)
+viewTrack : Model.Track -> List (Svg.Svg Model.Msg)
 viewTrack track =
     case track.direction of
         Model.NS ->
@@ -138,7 +155,7 @@ viewTrack track =
             viewTrackDiag track
 
 
-viewTrackOrthog : Model.Track -> List (Svg.Svg msg)
+viewTrackOrthog : Model.Track -> List (Svg.Svg Model.Msg)
 viewTrackOrthog track =
     let
         rotate =
@@ -153,13 +170,13 @@ viewTrackOrthog track =
         [ SvgA.fill (trackFill track)
         , SvgA.stroke "black"
         , SvgA.points "-30,5 30,5 30,-5 -30,-5 -30,5"
-        , SvgA.transform (String.join " " [ Panel.translateTile track.coords, rotate ])
+        , SvgA.transform (String.join " " [ Model.translateTile track.coords, rotate ])
         ]
         []
     ]
 
 
-viewTrackDiag : Model.Track -> List (Svg.Svg msg)
+viewTrackDiag : Model.Track -> List (Svg.Svg Model.Msg)
 viewTrackDiag track =
     let
         rotate =
@@ -180,7 +197,7 @@ viewTrackDiag track =
         [ SvgA.fill (trackFill track)
         , SvgA.stroke "black"
         , SvgA.points "5,-30 30,-5 30,5 -5,-30 5,-30"
-        , SvgA.transform (String.join " " [ Panel.translateTile track.coords, rotate ])
+        , SvgA.transform (String.join " " [ Model.translateTile track.coords, rotate ])
         ]
         []
     ]
@@ -203,10 +220,10 @@ tcFill status =
             "cyan"
 
 
-viewTrackCircuits : List (Svg.Svg msg)
-viewTrackCircuits =
+viewTrackCircuits : Model.Layout -> List (Svg.Svg Model.Msg)
+viewTrackCircuits layout =
     List.concat <|
-        List.map viewTC <|
+        List.map (viewTC layout.cbus) <|
             List.filter
                 (\track ->
                     case track.state of
@@ -216,23 +233,23 @@ viewTrackCircuits =
                         Nothing ->
                             False
                 )
-                Model.tracks
+                layout.tr
 
 
-viewTC : Model.Track -> List (Svg.Svg msg)
-viewTC track =
+viewTC : Model.CBUSStateDict -> Model.Track -> List (Svg.Svg Model.Msg)
+viewTC cbus track =
     case track.direction of
         Model.NS ->
-            viewTCOrtho track <| tcFill <| Model.getOBState track.state
+            viewTCOrtho track <| tcFill <| Model.getOBState track.state cbus
 
         Model.EW ->
-            viewTCOrtho track <| tcFill <| Model.getOBState track.state
+            viewTCOrtho track <| tcFill <| Model.getOBState track.state cbus
 
         _ ->
-            viewTCDiag track <| tcFill <| Model.getOBState track.state
+            viewTCDiag track <| tcFill <| Model.getOBState track.state cbus
 
 
-viewTCOrtho : Model.Track -> String -> List (Svg.Svg msg)
+viewTCOrtho : Model.Track -> String -> List (Svg.Svg Model.Msg)
 viewTCOrtho track status =
     let
         rotate =
@@ -246,7 +263,7 @@ viewTCOrtho track status =
     [ Svg.g
         [ SvgA.fill status
         , SvgA.stroke status
-        , SvgA.transform (String.join " " [ Panel.translateTile track.coords, rotate ])
+        , SvgA.transform (String.join " " [ Model.translateTile track.coords, rotate ])
         ]
         [ Svg.rect
             [ SvgA.x "-23"
@@ -268,7 +285,7 @@ viewTCOrtho track status =
     ]
 
 
-viewTCDiag : Model.Track -> String -> List (Svg.Svg msg)
+viewTCDiag : Model.Track -> String -> List (Svg.Svg Model.Msg)
 viewTCDiag track status =
     let
         rotate =
@@ -293,7 +310,7 @@ viewTCDiag track status =
         , SvgA.rx "2"
         , SvgA.fill status
         , SvgA.stroke status
-        , SvgA.transform (String.join " " [ Panel.translateTile track.coords, rotate ])
+        , SvgA.transform (String.join " " [ Model.translateTile track.coords, rotate ])
         ]
         []
     ]
@@ -316,10 +333,10 @@ spotFill spot =
             "green"
 
 
-viewSpots : List (Svg.Svg msg)
-viewSpots =
+viewSpots : Model.Layout -> List (Svg.Svg Model.Msg)
+viewSpots layout =
     List.concat <|
-        List.map viewSpot <|
+        List.map (viewSpot layout.cbus) <|
             List.filter
                 (\track ->
                     case track.spot of
@@ -329,23 +346,23 @@ viewSpots =
                         Nothing ->
                             False
                 )
-                Model.tracks
+                layout.tr
 
 
-viewSpot : Model.Track -> List (Svg.Svg msg)
-viewSpot track =
+viewSpot : Model.CBUSStateDict -> Model.Track -> List (Svg.Svg Model.Msg)
+viewSpot cbus track =
     case track.direction of
         Model.NS ->
-            viewSpotOrtho track <| spotFill <| Model.getOBState track.spot
+            viewSpotOrtho track <| spotFill <| Model.getOBState track.spot cbus
 
         Model.EW ->
-            viewSpotOrtho track <| spotFill <| Model.getOBState track.spot
+            viewSpotOrtho track <| spotFill <| Model.getOBState track.spot cbus
 
         _ ->
-            viewSpotDiag track <| spotFill <| Model.getOBState track.spot
+            viewSpotDiag track <| spotFill <| Model.getOBState track.spot cbus
 
 
-viewSpotOrtho : Model.Track -> String -> List (Svg.Svg msg)
+viewSpotOrtho : Model.Track -> String -> List (Svg.Svg Model.Msg)
 viewSpotOrtho track spot =
     let
         rotate =
@@ -359,7 +376,7 @@ viewSpotOrtho track spot =
     [ Svg.g
         [ SvgA.fill spot
         , SvgA.stroke spot
-        , SvgA.transform (String.join " " [ Panel.translateTile track.coords, rotate ])
+        , SvgA.transform (String.join " " [ Model.translateTile track.coords, rotate ])
         ]
         [ Svg.rect
             [ SvgA.x "-10"
@@ -373,7 +390,7 @@ viewSpotOrtho track spot =
     ]
 
 
-viewSpotDiag : Model.Track -> String -> List (Svg.Svg msg)
+viewSpotDiag : Model.Track -> String -> List (Svg.Svg Model.Msg)
 viewSpotDiag track spot =
     let
         rotate =
@@ -398,7 +415,7 @@ viewSpotDiag track spot =
         , SvgA.rx "2"
         , SvgA.fill spot
         , SvgA.stroke spot
-        , SvgA.transform (String.join " " [ Panel.translateTile track.coords, rotate ])
+        , SvgA.transform (String.join " " [ Model.translateTile track.coords, rotate ])
         ]
         []
     ]
@@ -409,7 +426,7 @@ viewSpotDiag track spot =
 ---- Convert double bit state into colours
 
 
-textAttr : Model.Turnout -> ( Int, Int ) -> List (Svg.Attribute msg)
+textAttr : Model.Turnout -> ( Int, Int ) -> List (Svg.Attribute Model.Msg)
 textAttr turnout offset =
     let
         translation =
@@ -466,12 +483,12 @@ turnoutRotation turnout =
             "rotate(0)"
 
 
-viewTurnouts : List (Svg.Svg msg)
-viewTurnouts =
-    List.concat <| List.map viewTurnout Model.turnouts
+viewTurnouts : List Model.Turnout -> List (Svg.Svg Model.Msg)
+viewTurnouts turnouts =
+    List.concat <| List.map viewTurnout turnouts
 
 
-viewTurnout : Model.Turnout -> List (Svg.Svg msg)
+viewTurnout : Model.Turnout -> List (Svg.Svg Model.Msg)
 viewTurnout turnout =
     case turnout.hand of
         Model.TOLeft ->
@@ -484,12 +501,12 @@ viewTurnout turnout =
             viewTOWye turnout
 
 
-viewTOLeft : Model.Turnout -> List (Svg.Svg msg)
+viewTOLeft : Model.Turnout -> List (Svg.Svg Model.Msg)
 viewTOLeft turnout =
     [ Svg.g
         [ SvgA.fill (turnoutFill turnout)
         , SvgA.stroke "black"
-        , SvgA.transform (String.join " " [ Panel.translateTile turnout.coords, turnoutRotation turnout ])
+        , SvgA.transform (String.join " " [ Model.translateTile turnout.coords, turnoutRotation turnout ])
         ]
         [ Svg.polyline
             [ SvgA.points "-30,5 30,5 30,-5 -30,-5 -30,5"
@@ -506,12 +523,12 @@ viewTOLeft turnout =
     ]
 
 
-viewTORight : Model.Turnout -> List (Svg.Svg msg)
+viewTORight : Model.Turnout -> List (Svg.Svg Model.Msg)
 viewTORight turnout =
     [ Svg.g
         [ SvgA.fill (turnoutFill turnout)
         , SvgA.stroke "black"
-        , SvgA.transform (String.join " " [ Panel.translateTile turnout.coords, turnoutRotation turnout ])
+        , SvgA.transform (String.join " " [ Model.translateTile turnout.coords, turnoutRotation turnout ])
         ]
         [ Svg.polyline
             [ SvgA.points "-30,5 30,5 30,-5 -30,-5 -30,5"
@@ -528,12 +545,12 @@ viewTORight turnout =
     ]
 
 
-viewTOWye : Model.Turnout -> List (Svg.Svg msg)
+viewTOWye : Model.Turnout -> List (Svg.Svg Model.Msg)
 viewTOWye turnout =
     [ Svg.g
         [ SvgA.fill (turnoutFill turnout)
         , SvgA.stroke "black"
-        , SvgA.transform (String.join " " [ Panel.translateTile turnout.coords, turnoutRotation turnout ])
+        , SvgA.transform (String.join " " [ Model.translateTile turnout.coords, turnoutRotation turnout ])
         ]
         [ Svg.polyline
             [ SvgA.points "0,5 30,5 30,-5 0,-5 0,5"
@@ -580,10 +597,10 @@ leverFill double =
             ( "red", "red" )
 
 
-viewLevers : List (Svg.Svg msg)
-viewLevers =
+viewLevers : Model.Layout -> List (Svg.Svg Model.Msg)
+viewLevers layout =
     List.concat <|
-        List.map viewLever <|
+        List.map (viewLever layout.cbus) <|
             List.filter
                 (\turnout ->
                     case turnout.state of
@@ -593,11 +610,11 @@ viewLevers =
                         Nothing ->
                             False
                 )
-                Model.turnouts
+                layout.to
 
 
-viewLever : Model.Turnout -> List (Svg.Svg msg)
-viewLever turnout =
+viewLever : Model.CBUSStateDict -> Model.Turnout -> List (Svg.Svg Model.Msg)
+viewLever cbus turnout =
     let
         getTON : Maybe ( String, String ) -> Maybe String
         getTON state =
@@ -618,7 +635,7 @@ viewLever turnout =
                     Nothing
 
         status =
-            ( Model.getOBState <| getTON turnout.state, Model.getOBState <| getTOR turnout.state )
+            ( Model.getOBState (getTON turnout.state) cbus, Model.getOBState (getTOR turnout.state) cbus )
     in
     case turnout.hand of
         Model.TOLeft ->
@@ -631,11 +648,11 @@ viewLever turnout =
             viewLeverWye turnout (leverFill status) (turnoutRotation turnout)
 
 
-viewLeverLeft : Model.Turnout -> ( String, String ) -> String -> List (Svg.Svg msg)
+viewLeverLeft : Model.Turnout -> ( String, String ) -> String -> List (Svg.Svg Model.Msg)
 viewLeverLeft turnout status rotation =
     [ Svg.g
         [ SvgA.stroke "white"
-        , SvgA.transform (String.join " " [ Panel.translateTile turnout.coords, rotation ])
+        , SvgA.transform (String.join " " [ Model.translateTile turnout.coords, rotation ])
         ]
         [ Svg.rect
             [ SvgA.x "-23"
@@ -669,11 +686,11 @@ viewLeverLeft turnout status rotation =
     ]
 
 
-viewLeverRight : Model.Turnout -> ( String, String ) -> String -> List (Svg.Svg msg)
+viewLeverRight : Model.Turnout -> ( String, String ) -> String -> List (Svg.Svg Model.Msg)
 viewLeverRight turnout status rotation =
     [ Svg.g
         [ SvgA.stroke "white"
-        , SvgA.transform (String.join " " [ Panel.translateTile turnout.coords, rotation ])
+        , SvgA.transform (String.join " " [ Model.translateTile turnout.coords, rotation ])
         ]
         [ Svg.rect
             [ SvgA.x "-23"
@@ -707,11 +724,11 @@ viewLeverRight turnout status rotation =
     ]
 
 
-viewLeverWye : Model.Turnout -> ( String, String ) -> String -> List (Svg.Svg msg)
+viewLeverWye : Model.Turnout -> ( String, String ) -> String -> List (Svg.Svg Model.Msg)
 viewLeverWye turnout status rotation =
     [ Svg.g
         [ SvgA.stroke "white"
-        , SvgA.transform (String.join " " [ Panel.translateTile turnout.coords, rotation ])
+        , SvgA.transform (String.join " " [ Model.translateTile turnout.coords, rotation ])
         ]
         [ Svg.rect
             [ SvgA.x "-12"
@@ -750,25 +767,25 @@ viewLeverWye turnout status rotation =
 -- Controls
 
 
-viewControls : List (Svg.Svg msg)
-viewControls =
-    List.concat <| List.map viewControl Model.controls
+viewControls : Model.Layout -> List (Svg.Svg Model.Msg)
+viewControls layout =
+    List.concat <| List.map (viewControl layout.cbus) layout.sw
 
 
-viewControl : Model.Control -> List (Svg.Svg msg)
-viewControl control =
+viewControl : Model.CBUSStateDict -> Model.Control -> List (Svg.Svg Model.Msg)
+viewControl cbus control =
     case control.switch of
         Model.Toggle ->
-            List.concat [ viewSwBkgd control, viewSwState control ]
+            List.concat [ viewSwBkgd control, viewSwState control cbus ]
 
         _ ->
             []
 
 
-viewSwBkgd : Model.Control -> List (Svg.Svg msg)
+viewSwBkgd : Model.Control -> List (Svg.Svg Model.Msg)
 viewSwBkgd switch =
     [ Svg.g
-        [ SvgA.transform (Panel.translateTile switch.coords)
+        [ SvgA.transform (Model.translateTile switch.coords)
         ]
         [ Svg.circle
             [ SvgA.cx "0"
@@ -821,13 +838,13 @@ viewSwBkgd switch =
     ]
 
 
-viewSwState : Model.Control -> List (Svg.Svg msg)
-viewSwState switch =
-    List.concat [ viewKnob switch, viewLamps switch ]
+viewSwState : Model.Control -> Model.CBUSStateDict -> List (Svg.Svg Model.Msg)
+viewSwState switch cbus =
+    List.concat [ viewKnob switch cbus, viewLamps switch cbus ]
 
 
-viewKnob : Model.Control -> List (Svg.Svg msg)
-viewKnob switch =
+viewKnob : Model.Control -> Model.CBUSStateDict -> List (Svg.Svg Model.Msg)
+viewKnob switch cbus =
     let
         knobRotate : Model.OneBit -> String
         knobRotate action =
@@ -854,23 +871,23 @@ viewKnob switch =
                     "white"
     in
     [ Svg.g
-        [ SvgA.transform (Panel.translateTile switch.coords)
+        [ SvgA.transform (Model.translateTile switch.coords)
         ]
         [ Svg.polyline
             [ SvgA.fill "none"
-            , SvgA.stroke (knobColour <| Model.getOBState switch.action)
+            , SvgA.stroke (knobColour <| Model.getOBState switch.action cbus)
             , SvgA.strokeLinecap "round"
             , SvgA.strokeWidth "0.75"
             , SvgA.points "0,-9 5,-2 2,-2 2,8 -2,8 -2,-2 -5,-2 0,-9"
-            , SvgA.transform (String.join " " [ "translate(0 15)", knobRotate <| Model.getOBState switch.action ])
+            , SvgA.transform (String.join " " [ "translate(0 15)", knobRotate <| Model.getOBState switch.action cbus ])
             ]
             []
         ]
     ]
 
 
-viewLamps : Model.Control -> List (Svg.Svg msg)
-viewLamps switch =
+viewLamps : Model.Control -> Model.CBUSStateDict -> List (Svg.Svg Model.Msg)
+viewLamps switch cbus =
     let
         getLampN : Maybe ( String, String ) -> Maybe String
         getLampN state =
@@ -891,10 +908,10 @@ viewLamps switch =
                     Nothing
 
         status =
-            leverFill ( Model.getOBState <| getLampN switch.state, Model.getOBState <| getLampR switch.state )
+            leverFill ( Model.getOBState (getLampN switch.state) cbus, Model.getOBState (getLampR switch.state) cbus )
     in
     [ Svg.g
-        [ SvgA.transform (Panel.translateTile switch.coords)
+        [ SvgA.transform (Model.translateTile switch.coords)
         ]
         [ Svg.circle
             [ SvgA.cx "-17"

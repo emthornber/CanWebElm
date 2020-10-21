@@ -1,24 +1,33 @@
 module LayoutJson exposing (..)
 
 import Dict
+import Http
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Model
 import Panel
 
 
+fetchLayout : Cmd Model.Msg
+fetchLayout =
+    Http.get
+        { url = "http://localhost:8000/cagdemo.json"
+        , expect = Http.expectJson Model.LoadLayout layoutDecoder
+        }
+
+
 
 -- Json Decoders
 
 
-decodeLayoutJson : Decode.Decoder Model.Model
-decodeLayoutJson =
-    Decode.succeed Model.Model
+layoutDecoder : Decode.Decoder Model.Layout
+layoutDecoder =
+    Decode.succeed Model.Layout
         |> required "panel" decodeDiagram
-        |> required "cbusstates" decodeCbus
         |> required "controls" (Decode.list decodeControl)
         |> required "track" (Decode.list decodeTrack)
         |> required "turnouts" (Decode.list decodeTurnout)
+        |> required "cbusstates" decodeCbus
 
 
 decodeDiagram : Decode.Decoder Panel.Diagram
@@ -41,7 +50,7 @@ decodeCbus =
 
 cbusStateDecoder : Decode.Decoder Model.CBUSState
 cbusStateDecoder =
-    Decode.map2 Model.CBUSState (Decode.field "event" Decode.string) (Decode.field "state" Decode.string |> Decode.andThen oneBitDecoder)
+    Decode.map2 Model.CBUSState (Decode.maybe (Decode.field "event" Decode.string)) (Decode.field "state" Decode.string |> Decode.andThen oneBitDecoder)
 
 
 oneBitDecoder : String -> Decode.Decoder Model.OneBit
@@ -69,7 +78,7 @@ decodeControl =
 
 decodePosition : Decode.Decoder ( Int, Int )
 decodePosition =
-    Decode.map2 Tuple.pair (Decode.at [ "tile", "xcoord" ] Decode.int) (Decode.at [ "tile", "ycoord" ] Decode.int)
+    Decode.map2 Tuple.pair (Decode.field "x-coord" Decode.int) (Decode.field "y-coord" Decode.int)
 
 
 switchDecoder : String -> Decode.Decoder Model.Actuator
@@ -87,7 +96,7 @@ switchDecoder switch =
 
 decodeTwoInput : Decode.Decoder ( String, String )
 decodeTwoInput =
-    Decode.map2 Tuple.pair (Decode.at [ "tostate", "normal" ] Decode.string) (Decode.at [ "tostate", "reverse" ] Decode.string)
+    Decode.map2 Tuple.pair (Decode.field "normal" Decode.string) (Decode.field "reverse" Decode.string)
 
 
 decodeTrack : Decode.Decoder Model.Track
