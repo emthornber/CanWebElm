@@ -14,12 +14,14 @@ type Status
 
 
 type Msg
-    = LoadLayout (Result Http.Error Layout)
+    = LoadLayout (Result Http.Error Model)
+    | ClickedOneBit String
 
 
 type alias Model =
-    { status : Status
+    { cbus : CBUSStateDict
     , layout : Maybe Layout
+    , status : Status
     }
 
 
@@ -28,14 +30,14 @@ type alias Layout =
     , sw : List Control
     , tr : List Track
     , to : List Turnout
-    , cbus : CBUSStateDict
     }
 
 
 initialModel : Model
 initialModel =
-    { status = Loading
+    { cbus = Dict.empty
     , layout = Nothing
+    , status = Loading
     }
 
 
@@ -45,7 +47,6 @@ initialLayout =
     , sw = controls
     , tr = tracks
     , to = turnouts
-    , cbus = Dict.empty
     }
 
 
@@ -132,6 +133,54 @@ getOBState name cbus =
     getOneBit <| getState name
 
 
+setOBState : CBUSStateDict -> Maybe String -> OneBit -> CBUSStateDict
+setOBState cbus name newState =
+    let
+        getState : Maybe String -> Maybe CBUSState
+        getState value =
+            case value of
+                Just key ->
+                    case Dict.get key cbus of
+                        Just record ->
+                            Just record
+
+                        Nothing ->
+                            Nothing
+
+                Nothing ->
+                    Nothing
+
+        getOneBit : Maybe CBUSState -> OneBit
+        getOneBit state =
+            case state of
+                Just value ->
+                    value.state
+
+                Nothing ->
+                    UNKN
+    in
+    -- Dict.update name (\rec -> { rec | state = newState }) cbus
+    cbus
+
+
+toggleOBState : CBUSState -> CBUSState
+toggleOBState v =
+    let
+        newOB : OneBit -> OneBit
+        newOB oldOB =
+            case oldOB of
+                ZERO ->
+                    ONE
+
+                ONE ->
+                    ZERO
+
+                UNKN ->
+                    ZERO
+    in
+    { v | state = newOB v.state }
+
+
 cbusStates : CBUSStateDict
 cbusStates =
     Dict.fromList
@@ -196,35 +245,35 @@ type TrackDirection
 
 
 type alias Track =
-    { coords : ( Int, Int ), direction : TrackDirection, state : Maybe String, spot : Maybe String }
+    { coords : ( Int, Int ), direction : TrackDirection, label : Maybe String, state : Maybe String, spot : Maybe String }
 
 
 tracks : List Track
 tracks =
-    [ Track ( 1, 5 ) EW Nothing Nothing
-    , Track ( 2, 5 ) EW (Just "TCAA") (Just "TCAA")
-    , Track ( 3, 5 ) EW (Just "TCBA") (Just "TCBA")
-    , Track ( 4, 5 ) EW (Just "TCCA") (Just "TCCA")
-    , Track ( 1, 6 ) NS Nothing Nothing
-    , Track ( 2, 6 ) NS (Just "TCAA") Nothing
-    , Track ( 3, 6 ) NS (Just "TCBA") Nothing
-    , Track ( 4, 6 ) NS (Just "TCCA") Nothing
-    , Track ( 1, 7 ) NE Nothing Nothing
-    , Track ( 1, 7 ) SE Nothing Nothing
-    , Track ( 1, 7 ) SW Nothing Nothing
-    , Track ( 1, 7 ) NW Nothing (Just "TCBA")
-    , Track ( 2, 7 ) NE (Just "TCAA") (Just "TCAA")
-    , Track ( 2, 7 ) SE (Just "TCAA") Nothing
-    , Track ( 2, 7 ) SW (Just "TCAA") Nothing
-    , Track ( 2, 7 ) NW (Just "TCAA") Nothing
-    , Track ( 3, 7 ) NE (Just "TCBA") Nothing
-    , Track ( 3, 7 ) SE (Just "TCBA") (Just "TCBA")
-    , Track ( 3, 7 ) SW (Just "TCBA") Nothing
-    , Track ( 3, 7 ) NW (Just "TCBA") Nothing
-    , Track ( 4, 7 ) NE (Just "TCCA") Nothing
-    , Track ( 4, 7 ) SE (Just "TCCA") Nothing
-    , Track ( 4, 7 ) SW (Just "TCCA") (Just "TCCA")
-    , Track ( 4, 7 ) NW (Just "TCCA") Nothing
+    [ Track ( 1, 5 ) EW Nothing Nothing Nothing
+    , Track ( 2, 5 ) EW (Just "AA") (Just "TCAA") (Just "TCAA")
+    , Track ( 3, 5 ) EW (Just "BA") (Just "TCBA") (Just "TCBA")
+    , Track ( 4, 5 ) EW (Just "CA") (Just "TCCA") (Just "TCCA")
+    , Track ( 1, 6 ) NS Nothing Nothing Nothing
+    , Track ( 2, 6 ) NS (Just "AA") (Just "TCAA") Nothing
+    , Track ( 3, 6 ) NS (Just "BA") (Just "TCBA") Nothing
+    , Track ( 4, 6 ) NS (Just "CA") (Just "TCCA") Nothing
+    , Track ( 1, 7 ) NE Nothing Nothing Nothing
+    , Track ( 1, 7 ) SE Nothing Nothing Nothing
+    , Track ( 1, 7 ) SW Nothing Nothing Nothing
+    , Track ( 1, 7 ) NW Nothing Nothing (Just "TCBA")
+    , Track ( 2, 7 ) NE (Just "AA") (Just "TCAA") (Just "TCAA")
+    , Track ( 2, 7 ) SE (Just "AA") (Just "TCAA") Nothing
+    , Track ( 2, 7 ) SW (Just "AA") (Just "TCAA") Nothing
+    , Track ( 2, 7 ) NW (Just "AA") (Just "TCAA") Nothing
+    , Track ( 3, 7 ) NE (Just "BA") (Just "TCBA") Nothing
+    , Track ( 3, 7 ) SE (Just "BA") (Just "TCBA") (Just "TCBA")
+    , Track ( 3, 7 ) SW (Just "BA") (Just "TCBA") Nothing
+    , Track ( 3, 7 ) NW (Just "BA") (Just "TCBA") Nothing
+    , Track ( 4, 7 ) NE (Just "CA") (Just "TCCA") Nothing
+    , Track ( 4, 7 ) SE (Just "CA") (Just "TCCA") Nothing
+    , Track ( 4, 7 ) SW (Just "CA") (Just "TCCA") (Just "TCCA")
+    , Track ( 4, 7 ) NW (Just "CA") (Just "TCCA") Nothing
     ]
 
 

@@ -167,6 +167,7 @@ trackFullTest =
                             "y-coord": 3
                         },
                         "direction": "EW",
+                        "label" : "AA",
                         "tcstate": "TCAA",
                         "spot": "TCAA"
                     }
@@ -180,7 +181,7 @@ trackFullTest =
             in
             Expect.equal (decodedOutput input)
                 (Ok
-                    (Model.Track ( 1, 3 ) Model.EW (Just "TCAA") (Just "TCAA"))
+                    (Model.Track ( 1, 3 ) Model.EW (Just "AA") (Just "TCAA") (Just "TCAA"))
                 )
 
 
@@ -208,7 +209,7 @@ trackPartialTest =
             in
             Expect.equal (decodedOutput input)
                 (Ok
-                    (Model.Track ( 1, 3 ) Model.EW Nothing Nothing)
+                    (Model.Track ( 1, 3 ) Model.EW Nothing Nothing Nothing)
                 )
 
 

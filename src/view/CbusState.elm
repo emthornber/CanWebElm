@@ -11,17 +11,13 @@ module CbusState exposing (view)
 import Dict
 import Html
 import Html.Attributes as HtmlA
+import Html.Events as HtmlE
 import Model
 
 
 view : Model.Model -> Html.Html Model.Msg
 view model =
-    case model.layout of
-        Just layout ->
-            viewCbusDict layout.cbus
-
-        Nothing ->
-            viewNoLayout
+    viewCbusDict model.cbus
 
 
 viewCbusDict : Model.CBUSStateDict -> Html.Html Model.Msg
@@ -56,6 +52,15 @@ viewNoLayout =
 viewCbusDictEntry : ( String, Model.CBUSState ) -> Html.Html Model.Msg
 viewCbusDictEntry ( name, state ) =
     let
+        buttonOrText : Maybe String -> List (Html.Html Model.Msg)
+        buttonOrText event =
+            case event of
+                Just ev ->
+                    [ Html.button [ HtmlE.onClick (Model.ClickedOneBit name) ] [ Html.text name ] ]
+
+                Nothing ->
+                    [ Html.text name ]
+
         event2Text : Maybe String -> String
         event2Text event =
             case event of
@@ -78,7 +83,7 @@ viewCbusDictEntry ( name, state ) =
                     "ONE"
     in
     Html.tr []
-        [ Html.td [] [ Html.text name ]
+        [ Html.td [] (buttonOrText state.event)
         , Html.td [] [ Html.text (event2Text state.event) ]
         , Html.td [] [ Html.text (oneBit2Text state.state) ]
         ]

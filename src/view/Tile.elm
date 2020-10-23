@@ -21,14 +21,23 @@ view : Model.Model -> Html.Html Model.Msg
 view model =
     case model.layout of
         Just layout ->
-            viewLayout layout
+            viewLayout model
 
         Nothing ->
             viewLoading
 
 
-viewLayout : Model.Layout -> Html.Html Model.Msg
-viewLayout layout =
+viewLayout : Model.Model -> Html.Html Model.Msg
+viewLayout model =
+    let
+        layout =
+            case model.layout of
+                Just val ->
+                    val
+
+                Nothing ->
+                    Model.initialLayout
+    in
     Html.div [ HtmlA.class "panel" ]
         [ Html.h2 [] [ Html.text layout.panel.name ]
         , Svg.svg
@@ -38,12 +47,12 @@ viewLayout layout =
             ]
             (List.concat
                 [ viewBackground layout.panel
-                , viewTracks layout.tr
-                , viewTrackCircuits layout
-                , viewSpots layout
-                , viewTurnouts layout.to
-                , viewLevers layout
-                , viewControls layout
+                , viewTracks layout
+                , viewTrackCircuits layout model.cbus
+                , viewSpots layout model.cbus
+                , viewTurnouts layout
+                , viewLevers layout model.cbus
+                , viewControls layout model.cbus
                 ]
             )
         ]
@@ -127,6 +136,43 @@ viewBackground diagram =
 -- Track Layout definitions
 
 
+labelAttr : Model.Track -> ( Int, Int ) -> List (Svg.Attribute Model.Msg)
+labelAttr track offset =
+    let
+        translation =
+            "translate(" ++ String.fromInt (Tuple.first offset) ++ ", " ++ String.fromInt (Tuple.second offset) ++ ")"
+
+        rotation =
+            case track.direction of
+                Model.NS ->
+                    "rotate(-90)"
+
+                Model.NE ->
+                    "rotate(45)"
+
+                Model.NW ->
+                    "rotate(-45)"
+
+                Model.SE ->
+                    "rotate(135)"
+
+                Model.SW ->
+                    "rotate(-135)"
+
+                Model.EW ->
+                    "rotate(0)"
+    in
+    [ SvgA.fontFamily "monospace"
+    , SvgA.fontSize "small"
+    , SvgA.fill "black"
+    , SvgA.stroke "none"
+    , SvgA.x "0"
+    , SvgA.y "4"
+    , SvgA.textAnchor "middle"
+    , SvgA.transform (String.join " " [ translation, rotation ])
+    ]
+
+
 trackFill : Model.Track -> String
 trackFill track =
     case track.state of
@@ -137,9 +183,9 @@ trackFill track =
             "none"
 
 
-viewTracks : List Model.Track -> List (Svg.Svg Model.Msg)
-viewTracks tracks =
-    List.concat <| List.map viewTrack tracks
+viewTracks : Model.Layout -> List (Svg.Svg Model.Msg)
+viewTracks layout =
+    List.concat <| List.map viewTrack layout.tr
 
 
 viewTrack : Model.Track -> List (Svg.Svg Model.Msg)
@@ -166,13 +212,18 @@ viewTrackOrthog track =
                 _ ->
                     "rotate(0)"
     in
-    [ Svg.polyline
-        [ SvgA.fill (trackFill track)
-        , SvgA.stroke "black"
-        , SvgA.points "-30,5 30,5 30,-5 -30,-5 -30,5"
-        , SvgA.transform (String.join " " [ Model.translateTile track.coords, rotate ])
+    [ Svg.g
+        [ SvgA.transform (String.join " " [ Model.translateTile track.coords, rotate ]) ]
+        [ Svg.polyline
+            [ SvgA.fill (trackFill track)
+            , SvgA.stroke "black"
+            , SvgA.points "-30,5 30,5 30,-5 -30,-5 -30,5"
+            ]
+            []
+        , Svg.text_
+            (labelAttr track ( 0, 18 ))
+            [ Svg.text (Maybe.withDefault "" track.label) ]
         ]
-        []
     ]
 
 
@@ -193,13 +244,18 @@ viewTrackDiag track =
                 _ ->
                     "rotate(0)"
     in
-    [ Svg.polyline
-        [ SvgA.fill (trackFill track)
-        , SvgA.stroke "black"
-        , SvgA.points "5,-30 30,-5 30,5 -5,-30 5,-30"
-        , SvgA.transform (String.join " " [ Model.translateTile track.coords, rotate ])
+    [ Svg.g
+        [ SvgA.transform (String.join " " [ Model.translateTile track.coords, rotate ]) ]
+        [ Svg.polyline
+            [ SvgA.fill (trackFill track)
+            , SvgA.stroke "black"
+            , SvgA.points "5,-30 30,-5 30,5 -5,-30 5,-30"
+            ]
+            []
+        , Svg.text_
+            (labelAttr track ( 0, -5 ))
+            [ Svg.text (Maybe.withDefault "" track.label) ]
         ]
-        []
     ]
 
 
@@ -220,10 +276,10 @@ tcFill status =
             "cyan"
 
 
-viewTrackCircuits : Model.Layout -> List (Svg.Svg Model.Msg)
-viewTrackCircuits layout =
+viewTrackCircuits : Model.Layout -> Model.CBUSStateDict -> List (Svg.Svg Model.Msg)
+viewTrackCircuits layout cbus =
     List.concat <|
-        List.map (viewTC layout.cbus) <|
+        List.map (viewTC cbus) <|
             List.filter
                 (\track ->
                     case track.state of
@@ -333,10 +389,10 @@ spotFill spot =
             "green"
 
 
-viewSpots : Model.Layout -> List (Svg.Svg Model.Msg)
-viewSpots layout =
+viewSpots : Model.Layout -> Model.CBUSStateDict -> List (Svg.Svg Model.Msg)
+viewSpots layout cbus =
     List.concat <|
-        List.map (viewSpot layout.cbus) <|
+        List.map (viewSpot cbus) <|
             List.filter
                 (\track ->
                     case track.spot of
@@ -483,9 +539,9 @@ turnoutRotation turnout =
             "rotate(0)"
 
 
-viewTurnouts : List Model.Turnout -> List (Svg.Svg Model.Msg)
-viewTurnouts turnouts =
-    List.concat <| List.map viewTurnout turnouts
+viewTurnouts : Model.Layout -> List (Svg.Svg Model.Msg)
+viewTurnouts layout =
+    List.concat <| List.map viewTurnout layout.to
 
 
 viewTurnout : Model.Turnout -> List (Svg.Svg Model.Msg)
@@ -597,10 +653,32 @@ leverFill double =
             ( "red", "red" )
 
 
-viewLevers : Model.Layout -> List (Svg.Svg Model.Msg)
-viewLevers layout =
+leverStroke : Model.TwoBit -> ( String, String )
+leverStroke double =
+    case double of
+        ( Model.UNKN, _ ) ->
+            ( "grey", "grey" )
+
+        ( _, Model.UNKN ) ->
+            ( "grey", "grey" )
+
+        ( Model.ZERO, Model.ZERO ) ->
+            ( "white", "white" )
+
+        ( Model.ONE, Model.ZERO ) ->
+            ( "none", "white" )
+
+        ( Model.ZERO, Model.ONE ) ->
+            ( "white", "none" )
+
+        _ ->
+            ( "red", "red" )
+
+
+viewLevers : Model.Layout -> Model.CBUSStateDict -> List (Svg.Svg Model.Msg)
+viewLevers layout cbus =
     List.concat <|
-        List.map (viewLever layout.cbus) <|
+        List.map (viewLever cbus) <|
             List.filter
                 (\turnout ->
                     case turnout.state of
@@ -639,20 +717,19 @@ viewLever cbus turnout =
     in
     case turnout.hand of
         Model.TOLeft ->
-            viewLeverLeft turnout (leverFill status) (turnoutRotation turnout)
+            viewLeverLeft turnout (leverStroke status) (leverFill status) (turnoutRotation turnout)
 
         Model.TORight ->
-            viewLeverRight turnout (leverFill status) (turnoutRotation turnout)
+            viewLeverRight turnout (leverStroke status) (leverFill status) (turnoutRotation turnout)
 
         Model.TOWye ->
-            viewLeverWye turnout (leverFill status) (turnoutRotation turnout)
+            viewLeverWye turnout (leverStroke status) (leverFill status) (turnoutRotation turnout)
 
 
-viewLeverLeft : Model.Turnout -> ( String, String ) -> String -> List (Svg.Svg Model.Msg)
-viewLeverLeft turnout status rotation =
+viewLeverLeft : Model.Turnout -> ( String, String ) -> ( String, String ) -> String -> List (Svg.Svg Model.Msg)
+viewLeverLeft turnout stroke fill rotation =
     [ Svg.g
-        [ SvgA.stroke "white"
-        , SvgA.transform (String.join " " [ Model.translateTile turnout.coords, rotation ])
+        [ SvgA.transform (String.join " " [ Model.translateTile turnout.coords, rotation ])
         ]
         [ Svg.rect
             [ SvgA.x "-23"
@@ -660,7 +737,8 @@ viewLeverLeft turnout status rotation =
             , SvgA.width "16"
             , SvgA.height "4"
             , SvgA.rx "2"
-            , SvgA.fill (Tuple.first status)
+            , SvgA.stroke (Tuple.first stroke)
+            , SvgA.fill (Tuple.first fill)
             ]
             []
         , Svg.rect
@@ -669,7 +747,8 @@ viewLeverLeft turnout status rotation =
             , SvgA.width "16"
             , SvgA.height "4"
             , SvgA.rx "2"
-            , SvgA.fill (Tuple.first status)
+            , SvgA.stroke (Tuple.first stroke)
+            , SvgA.fill (Tuple.first fill)
             ]
             []
         , Svg.rect
@@ -678,7 +757,8 @@ viewLeverLeft turnout status rotation =
             , SvgA.width "16"
             , SvgA.height "4"
             , SvgA.rx "2"
-            , SvgA.fill (Tuple.second status)
+            , SvgA.stroke (Tuple.second stroke)
+            , SvgA.fill (Tuple.second fill)
             , SvgA.transform "rotate( 135 )"
             ]
             []
@@ -686,11 +766,10 @@ viewLeverLeft turnout status rotation =
     ]
 
 
-viewLeverRight : Model.Turnout -> ( String, String ) -> String -> List (Svg.Svg Model.Msg)
-viewLeverRight turnout status rotation =
+viewLeverRight : Model.Turnout -> ( String, String ) -> ( String, String ) -> String -> List (Svg.Svg Model.Msg)
+viewLeverRight turnout stroke fill rotation =
     [ Svg.g
-        [ SvgA.stroke "white"
-        , SvgA.transform (String.join " " [ Model.translateTile turnout.coords, rotation ])
+        [ SvgA.transform (String.join " " [ Model.translateTile turnout.coords, rotation ])
         ]
         [ Svg.rect
             [ SvgA.x "-23"
@@ -698,7 +777,8 @@ viewLeverRight turnout status rotation =
             , SvgA.width "16"
             , SvgA.height "4"
             , SvgA.rx "2"
-            , SvgA.fill (Tuple.first status)
+            , SvgA.stroke (Tuple.first stroke)
+            , SvgA.fill (Tuple.first fill)
             ]
             []
         , Svg.rect
@@ -707,7 +787,8 @@ viewLeverRight turnout status rotation =
             , SvgA.width "16"
             , SvgA.height "4"
             , SvgA.rx "2"
-            , SvgA.fill (Tuple.first status)
+            , SvgA.stroke (Tuple.first stroke)
+            , SvgA.fill (Tuple.first fill)
             ]
             []
         , Svg.rect
@@ -716,7 +797,8 @@ viewLeverRight turnout status rotation =
             , SvgA.width "16"
             , SvgA.height "4"
             , SvgA.rx "2"
-            , SvgA.fill (Tuple.second status)
+            , SvgA.stroke (Tuple.second stroke)
+            , SvgA.fill (Tuple.second fill)
             , SvgA.transform "rotate( 45 )"
             ]
             []
@@ -724,11 +806,26 @@ viewLeverRight turnout status rotation =
     ]
 
 
-viewLeverWye : Model.Turnout -> ( String, String ) -> String -> List (Svg.Svg Model.Msg)
-viewLeverWye turnout status rotation =
+viewLeverWye : Model.Turnout -> ( String, String ) -> ( String, String ) -> String -> List (Svg.Svg Model.Msg)
+viewLeverWye turnout stroke fill rotation =
+    let
+        centreInd : ( String, String ) -> String
+        centreInd double =
+            case double of
+                ( "grey", _ ) ->
+                    "grey"
+
+                ( _, "grey" ) ->
+                    "grey"
+
+                ( "red", "red" ) ->
+                    "red"
+
+                _ ->
+                    "white"
+    in
     [ Svg.g
-        [ SvgA.stroke "white"
-        , SvgA.transform (String.join " " [ Model.translateTile turnout.coords, rotation ])
+        [ SvgA.transform (String.join " " [ Model.translateTile turnout.coords, rotation ])
         ]
         [ Svg.rect
             [ SvgA.x "-12"
@@ -736,7 +833,8 @@ viewLeverWye turnout status rotation =
             , SvgA.width "16"
             , SvgA.height "4"
             , SvgA.rx "2"
-            , SvgA.fill (Tuple.first status)
+            , SvgA.stroke (Tuple.first stroke)
+            , SvgA.fill (Tuple.first fill)
             , SvgA.transform "rotate( 45 )"
             ]
             []
@@ -746,7 +844,8 @@ viewLeverWye turnout status rotation =
             , SvgA.width "8"
             , SvgA.height "4"
             , SvgA.rx "2"
-            , SvgA.fill "white"
+            , SvgA.stroke (centreInd stroke)
+            , SvgA.fill (centreInd fill)
             ]
             []
         , Svg.rect
@@ -755,7 +854,8 @@ viewLeverWye turnout status rotation =
             , SvgA.width "16"
             , SvgA.height "4"
             , SvgA.rx "2"
-            , SvgA.fill (Tuple.second status)
+            , SvgA.stroke (Tuple.second stroke)
+            , SvgA.fill (Tuple.second fill)
             , SvgA.transform "rotate( 135 )"
             ]
             []
@@ -767,9 +867,9 @@ viewLeverWye turnout status rotation =
 -- Controls
 
 
-viewControls : Model.Layout -> List (Svg.Svg Model.Msg)
-viewControls layout =
-    List.concat <| List.map (viewControl layout.cbus) layout.sw
+viewControls : Model.Layout -> Model.CBUSStateDict -> List (Svg.Svg Model.Msg)
+viewControls layout cbus =
+    List.concat <| List.map (viewControl cbus) layout.sw
 
 
 viewControl : Model.CBUSStateDict -> Model.Control -> List (Svg.Svg Model.Msg)
@@ -907,8 +1007,11 @@ viewLamps switch cbus =
                 Nothing ->
                     Nothing
 
-        status =
+        fill =
             leverFill ( Model.getOBState (getLampN switch.state) cbus, Model.getOBState (getLampR switch.state) cbus )
+
+        stroke =
+            leverStroke ( Model.getOBState (getLampN switch.state) cbus, Model.getOBState (getLampR switch.state) cbus )
     in
     [ Svg.g
         [ SvgA.transform (Model.translateTile switch.coords)
@@ -917,16 +1020,16 @@ viewLamps switch cbus =
             [ SvgA.cx "-17"
             , SvgA.cy "-20"
             , SvgA.r "4.5"
-            , SvgA.stroke "white"
-            , SvgA.fill (Tuple.first status)
+            , SvgA.stroke (Tuple.first stroke)
+            , SvgA.fill (Tuple.first fill)
             ]
             []
         , Svg.circle
             [ SvgA.cx "17"
             , SvgA.cy "-20"
             , SvgA.r "4.5"
-            , SvgA.stroke "white"
-            , SvgA.fill (Tuple.second status)
+            , SvgA.stroke (Tuple.second stroke)
+            , SvgA.fill (Tuple.second fill)
             ]
             []
         ]

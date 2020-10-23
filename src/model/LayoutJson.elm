@@ -12,12 +12,20 @@ fetchLayout : Cmd Model.Msg
 fetchLayout =
     Http.get
         { url = "http://localhost:8000/cagdemo.json"
-        , expect = Http.expectJson Model.LoadLayout layoutDecoder
+        , expect = Http.expectJson Model.LoadLayout modelDecoder
         }
 
 
 
 -- Json Decoders
+
+
+modelDecoder : Decode.Decoder Model.Model
+modelDecoder =
+    Decode.succeed Model.Model
+        |> required "cbusstates" decodeCbus
+        |> required "layout" (Decode.maybe layoutDecoder)
+        |> hardcoded Model.Loaded
 
 
 layoutDecoder : Decode.Decoder Model.Layout
@@ -27,7 +35,6 @@ layoutDecoder =
         |> required "controls" (Decode.list decodeControl)
         |> required "track" (Decode.list decodeTrack)
         |> required "turnouts" (Decode.list decodeTurnout)
-        |> required "cbusstates" decodeCbus
 
 
 decodeDiagram : Decode.Decoder Panel.Diagram
@@ -104,6 +111,7 @@ decodeTrack =
     Decode.succeed Model.Track
         |> required "tile" decodePosition
         |> required "direction" (Decode.string |> Decode.andThen directionDecoder)
+        |> optional "label" (Decode.map Just Decode.string) Nothing
         |> optional "tcstate" (Decode.map Just Decode.string) Nothing
         |> optional "spot" (Decode.map Just Decode.string) Nothing
 

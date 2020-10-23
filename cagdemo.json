@@ -1,13 +1,4 @@
 {
-    "panel": {
-	"width": 11,
-	"height": 5,
-	"tilesize": 60,
-	"colour": "#a4b887",
-	"margins": 10,
-	"border": 2,
-	"title": "CAG CBUS Demo (Elm)"
-    },
     "cbusstates": [
 	{
 	    "name": "TCAA",
@@ -15,12 +6,22 @@
 	    "state": "UNKN"
 	},
 	{
+	    "name": "TCAAS",
+	    "event": "N5E4",
+	    "state": "UNKN"
+	},
+	{
 	    "name": "TCBA",
-	    "event": "N5E2",
+	    "event": "N5E1",
 	    "state": "UNKN"
 	},
 	{
 	    "name": "TCBB",
+	    "event": "N6E1",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "TCBBS",
 	    "event": "N6E2",
 	    "state": "UNKN"
 	},
@@ -31,12 +32,22 @@
 	},
 	{
 	    "name": "TCCB",
-	    "event": "N6E2",
+	    "event": "N6E3",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "TCCBS",
+	    "event": "N6E4",
 	    "state": "UNKN"
 	},
 	{
 	    "name": "TCDA",
 	    "event": "N7E3",
+	    "state": "UNKN"
+	},
+	{
+	    "name": "TCDAS",
+	    "event": "N7E4",
 	    "state": "UNKN"
 	},
 	{
@@ -86,220 +97,237 @@
 	    "state": "ZERO"
 	}
     ],
-    "controls": [
-	{
-	    "tile": {
-		"x-coord": 3,
-		"y-coord": 1
+    "layout": {
+	"panel": {
+	    "width": 11,
+	    "height": 5,
+	    "tilesize": 60,
+	    "colour": "#a4b887",
+	    "margins": 10,
+	    "border": 2,
+	    "title": "CAG CBUS Demo (Elm)"
+	},
+	"controls": [
+	    {
+		"tile": {
+		    "x-coord": 3,
+		    "y-coord": 1
+		},
+		"name": "101",
+		"switch": "Toggle",
+		"action": "101",
+		"tostate": {
+		    "normal": "101N",
+		    "reverse": "101R"
+		}
 	    },
-	    "name": "101",
-	    "switch": "Toggle",
-	    "action": "101",
-	    "tostate": {
-		"normal": "101N",
-		"reverse": "101R"
+	    {
+		"tile": {
+		    "x-coord": 9,
+		    "y-coord": 1
+		},
+		"name": "102",
+		"switch": "Toggle",
+		"action": "102",
+		"tostate": {
+		    "normal": "102N",
+		    "reverse": "102R"
+		}
 	    }
-	},
-	{
-	    "tile": {
-		"x-coord": 9,
-		"y-coord": 1
+	],
+	"track": [
+	    {
+		"tile": {
+		    "x-coord": 1,
+		    "y-coord": 3
+		},
+		"direction": "EW",
+		"tcstate": "TCAA",
+		"spot": "TCAAS"
 	    },
-	    "name": "102",
-	    "switch": "Toggle",
-	    "action": "102",
-	    "tostate": {
-		"normal": "102N",
-		"reverse": "102R"
+	    {
+		"tile": {
+		    "x-coord": 2,
+		    "y-coord": 3
+		},
+		"direction": "EW",
+		"label": "AA",
+		"tcstate": "TCAA"
+	    },
+	    {
+		"tile": {
+		    "x-coord": 4,
+		    "y-coord": 2
+		},
+		"direction": "EW",
+		"label": "BA",
+		"tcstate": "TCBA"
+	    },
+	    {
+		"tile": {
+		    "x-coord": 5,
+		    "y-coord": 2
+		},
+		"direction": "EW",
+		"tcstate": "TCBA"
+	    },
+	    {
+		"tile": {
+		    "x-coord": 6,
+		    "y-coord": 2
+		},
+		"direction": "EW",
+		"label": "BB",
+		"tcstate": "TCBB"
+	    },
+	    {
+		"tile": {
+		    "x-coord": 7,
+		    "y-coord": 2
+		},
+		"direction": "EW",
+		"tcstate": "TCBB",
+		"spot": "TCBBS"
+	    },
+	    {
+		"tile": {
+		    "x-coord": 4,
+		    "y-coord": 4
+		},
+		"direction": "EW",
+		"label": "CA",
+		"tcstate": "TCCA"
+	    },
+	    {
+		"tile": {
+		    "x-coord": 5,
+		    "y-coord": 4
+		},
+		"direction": "EW",
+		"tcstate": "TCCA"
+	    },
+	    {
+		"tile": {
+		    "x-coord": 6,
+		    "y-coord": 4
+		},
+		"direction": "EW",
+		"tcstate": "TCCB",
+		"spot": "TCCBS"
+	    },
+	    {
+		"tile": {
+		    "x-coord": 7,
+		    "y-coord": 4
+		},
+		"direction": "EW",
+		"label": "CB",
+		"tcstate": "TCCB"
+	    },
+	    {
+		"tile": {
+		    "x-coord": 8,
+		    "y-coord": 4
+		},
+		"direction": "EW",
+		"tcstate": "TCDA"
+	    },
+	    {
+		"tile": {
+		    "x-coord": 10,
+		    "y-coord": 4
+		},
+		"direction": "EW",
+		"label": "DA",
+		"tcstate": "TCDA"
+	    },
+	    {
+		"tile": {
+		    "x-coord": 11,
+		    "y-coord": 4
+		},
+		"direction": "EW",
+		"tcstate": "TCDA",
+		"spot": "TCDAS"
+	    },
+	    {
+		"tile": {
+		    "x-coord": 8,
+		    "y-coord": 2
+		},
+		"direction": "SW",
+		"tcstate": "TCDA"
+	    },
+	    {
+		"tile": {
+		    "x-coord": 8,
+		    "y-coord": 3
+		},
+		"direction": "NE",
+		"tcstate": "TCDA"
+	    },
+	    {
+		"tile": {
+		    "x-coord": 9,
+		    "y-coord": 3
+		},
+		"direction": "SW",
+		"tcstate": "TCDA"
 	    }
-	}
-    ],
-    "track": [
-	{
-	    "tile": {
-		"x-coord": 1,
-		"y-coord": 3
+	],
+	"turnouts": [
+	    {
+		"tile": {
+		    "x-coord": 3,
+		    "y-coord": 2
+		},
+		"name": "OOU",
+		"hand": "TOWye",
+		"orientation": "TOWest",
+		"tostate": {
+		    "normal": "OOU1N",
+		    "reverse": "OOU1R"
+		}
 	    },
-	    "direction": "EW",
-	    "tcstate": "TCAA",
-	    "spot": "TCAA"
-	},
-	{
-	    "tile": {
-		"x-coord": 2,
-		"y-coord": 3
+	    {
+		"tile": {
+		    "x-coord": 3,
+		    "y-coord": 3
+		},
+		"name": "101",
+		"hand": "TOWye",
+		"orientation": "TOEast",
+		"tostate": {
+		    "normal": "101N",
+		    "reverse": "101R"
+		}
 	    },
-	    "direction": "EW",
-	    "tcstate": "TCAA"
-	},
-	{
-	    "tile": {
-		"x-coord": 4,
-		"y-coord": 2
+	    {
+		"tile": {
+		    "x-coord": 3,
+		    "y-coord": 4
+		},
+		"name": "OOU",
+		"hand": "TOWye",
+		"orientation": "TOWest",
+		"tostate": {
+		    "normal": "OOU2N",
+		    "reverse": "OOU2R"
+		}
 	    },
-	    "direction": "EW",
-	    "tcstate": "TCBA"
-	},
-	{
-	    "tile": {
-		"x-coord": 5,
-		"y-coord": 2
-	    },
-	    "direction": "EW",
-	    "tcstate": "TCBA"
-	},
-	{
-	    "tile": {
-		"x-coord": 6,
-		"y-coord": 2
-	    },
-	    "direction": "EW",
-	    "tcstate": "TCBB"
-	},
-	{
-	    "tile": {
-		"x-coord": 7,
-		"y-coord": 2
-	    },
-	    "direction": "EW",
-	    "tcstate": "TCBB",
-	    "spot": "TCBB"
-	},
-	{
-	    "tile": {
-		"x-coord": 4,
-		"y-coord": 4
-	    },
-	    "direction": "EW",
-	    "tcstate": "TCCA"
-	},
-	{
-	    "tile": {
-		"x-coord": 5,
-		"y-coord": 4
-	    },
-	    "direction": "EW",
-	    "tcstate": "TCCA"
-	},
-	{
-	    "tile": {
-		"x-coord": 6,
-		"y-coord": 4
-	    },
-	    "direction": "EW",
-	    "tcstate": "TCCB",
-	    "spot": "TCCB"
-	},
-	{
-	    "tile": {
-		"x-coord": 7,
-		"y-coord": 4
-	    },
-	    "direction": "EW",
-	    "tcstate": "TCCB"
-	},
-	{
-	    "tile": {
-		"x-coord": 8,
-		"y-coord": 4
-	    },
-	    "direction": "EW",
-	    "tcstate": "TCDA"
-	},
-	{
-	    "tile": {
-		"x-coord": 10,
-		"y-coord": 4
-	    },
-	    "direction": "EW",
-	    "tcstate": "TCDA"
-	},
-	{
-	    "tile": {
-		"x-coord": 11,
-		"y-coord": 4
-	    },
-	    "direction": "EW",
-	    "tcstate": "TCDA",
-	    "spot": "TCDA"
-	},
-	{
-	    "tile": {
-		"x-coord": 8,
-		"y-coord": 2
-	    },
-	    "direction": "SW",
-	    "tcstate": "TCDA"
-	},
-	{
-	    "tile": {
-		"x-coord": 8,
-		"y-coord": 3
-	    },
-	    "direction": "NE",
-	    "tcstate": "TCDA"
-	},
-	{
-	    "tile": {
-		"x-coord": 9,
-		"y-coord": 3
-	    },
-	    "direction": "SW",
-	    "tcstate": "TCDA"
-	}
-    ],
-    "turnouts": [
-	{
-	    "tile": {
-		"x-coord": 3,
-		"y-coord": 2
-	    },
-	    "name": "OOU",
-	    "hand": "TOWye",
-	    "orientation": "TOWest",
-	    "tostate": {
-		"normal": "OOU1N",
-		"reverse": "OOU1R"
+	    {
+		"tile": {
+		    "x-coord": 9,
+		    "y-coord": 4
+		},
+		"name": "102",
+		"hand": "TORight",
+		"orientation": "TOWest",
+		"tostate": {
+		    "normal": "102N",
+		    "reverse": "102R"
+		}
 	    }
-	},
-	{
-	    "tile": {
-		"x-coord": 3,
-		"y-coord": 3
-	    },
-	    "name": "101",
-	    "hand": "TOWye",
-	    "orientation": "TOEast",
-	    "tostate": {
-		"normal": "101N",
-		"reverse": "101R"
-	    }
-	},
-	{
-	    "tile": {
-		"x-coord": 3,
-		"y-coord": 4
-	    },
-	    "name": "OOU",
-	    "hand": "TOWye",
-	    "orientation": "TOWest",
-	    "tostate": {
-		"normal": "OOU2N",
-		"reverse": "OOU2R"
-	    }
-	},
-	{
-	    "tile": {
-		"x-coord": 9,
-		"y-coord": 4
-	    },
-	    "name": "102",
-	    "hand": "TORight",
-	    "orientation": "TOWest",
-	    "tostate": {
-		"normal": "102N",
-		"reverse": "102R"
-	    }
-	}
-    ]
+	]
+    }
 }

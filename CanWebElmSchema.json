@@ -58,133 +58,143 @@
 	},
 	"required": [
 	    "name",
-	    "event",
 	    "state"
 	]
     },
-    "controls": {
-	"type": "object",
-	"properties": {
-	    "tile": { "$ref": "#/definitions/tile" },
-	    "name": { "$ref": "#/definitions/name" },
-	    "switch": {
-		"enum": [
-		    "Toggle",
-		    "PushButton"
-		]
+    "layout": {
+	"controls": {
+	    "type": "object",
+	    "properties": {
+		"tile": { "$ref": "#/definitions/tile" },
+		"name": { "$ref": "#/definitions/name" },
+		"switch": {
+		    "enum": [
+			"Toggle",
+			"PushButton"
+		    ]
+		},
+		"action": {
+		    "type": "string",
+		    "description": "Name of the CBUS output that controls a turnout"
+		},
+		"tostate": { "$ref": "#/definitions/tostate" }
 	    },
-	    "action": {
-		"type": "string",
-		"description": "Name of the CBUS output that controls a turnout"
-	    },
-	    "tostate": { "$ref": "#/definitions/tostate" }
-	},
-	"required": [
-	    "tile",
-	    "name",
-	    "switch",
-	    "action",
-	    "tostate"
+	    "required": [
+		"tile",
+		"name",
+		"switch",
+		"action",
+		"tostate"
 	]
-    },
-    "panel": {
-	"type": "object",
-	"properties": {
-	    "width": {
-		"type": "number",
-		"description": "Width of panel in tiles"
-	    },
-	    "height": {
-		"type": "number",
-		"description": "Height of panel in tiles"
-	    },
-	    "tilesize" : {
-		"type": "number",
-		"description": "Size of (square) tiles"
-	    },
-	    "colour": {
-		"type": "string",
-		"minLength": 7,
-		"maxLength": 7,
-		"description": "Colour of tile background as a hexadecimal string"
-	    },
-	    "margins" : {
-		"type": "number",
-		"description": "Margin around panel when drawn"
-	    },
-	    "border" : {
-		"type": "number",
-		"description": "Width of black boarder around panel"
-	    },
-	    "title": {
-		"type": "string",
-		"description": "Name of layout represented on panel"
-	    }
 	},
-	"required": [
-	    "width",
-	    "height",
-	    "tilesize",
-	    "colour",
-	    "margins",
-	    "border",
-	    "title"
+	"panel": {
+	    "type": "object",
+	    "properties": {
+		"width": {
+		    "type": "number",
+		    "description": "Width of panel in tiles"
+		},
+		"height": {
+		    "type": "number",
+		    "description": "Height of panel in tiles"
+		},
+		"tilesize" : {
+		    "type": "number",
+		    "description": "Size of (square) tiles"
+		},
+		"colour": {
+		    "type": "string",
+		    "minLength": 7,
+		    "maxLength": 7,
+		    "description": "Colour of tile background as a hexadecimal string"
+		},
+		"margins" : {
+		    "type": "number",
+		    "description": "Margin around panel when drawn"
+		},
+		"border" : {
+		    "type": "number",
+		    "description": "Width of black boarder around panel"
+		},
+		"title": {
+		    "type": "string",
+		    "description": "Name of layout represented on panel"
+		}
+	    },
+	    "required": [
+		"width",
+		"height",
+		"tilesize",
+		"colour",
+		"margins",
+		"border",
+		"title"
 	]
-    },
-    "track": {
-	"type": "object",
-	"properties": {
-	    "tile": { "$ref": "#/definitions/tile" },
-	    "direction": {
-		"enum": [
-		    "EW",
-		    "NE",
-		    "NS",
-		    "NW",
-		    "SE",
-		    "SW"
+	},
+	"track": {
+	    "type": "object",
+	    "properties": {
+		"tile": { "$ref": "#/definitions/tile" },
+		"direction": {
+		    "enum": [
+			"EW",
+			"NE",
+			"NS",
+			"NW",
+			"SE",
+			"SW"
+		    ]
+		},
+		"label": {
+		    "type": "string"
+		},
+		"tcstate": {
+		    "type": "string",
+		    "description": "Name of the CBUS input that shows track circuit occupation"
+		},
+		"spot": {
+		    "type": "string"
+		}
+	    },
+	    "required": [
+		"tile",
+		"direction"
+	    ]
+	},
+	"turnouts": {
+	    "type": "object",
+	    "properties": {
+		"tile": { "$ref": "#/definitions/tile" },
+		"name": { "$ref": "#/definitions/name" },
+		"hand": {
+		    "enum": [
+			"TOLeft",
+			"TORight",
+			"TOWye"
 		]
+		},
+		"orientation": {
+		    "enum": [
+			"TONorth",
+			"TOEast",
+			"TOSouth",
+			"TOWest"
+		    ]
+		},
+		"tostate": { "$ref": "#/definitions/tostate" }
 	    },
-	    "tcstate": {
-		"type": "string",
-		"description": "Name of the CBUS input that shows track circuit occupation"
-	    },
-	    "spot": {
-		"type": "string"
-	    }
+	    "required": [
+		"tile",
+		"name",
+		"hand",
+		"orientation"
+	    ]
 	},
 	"required": [
-	    "tile",
-	    "direction"
-	]
-    },
-    "turnouts": {
-	"type": "object",
-	"properties": {
-	    "tile": { "$ref": "#/definitions/tile" },
-	    "name": { "$ref": "#/definitions/name" },
-	    "hand": {
-		"enum": [
-		    "TOLeft",
-		    "TORight",
-		    "TOWye"
-		]
-	    },
-	    "orientation": {
-		"enum": [
-		    "TONorth",
-		    "TOEast",
-		    "TOSouth",
-		    "TOWest"
-		]
-	    },
-	    "tostate": { "$ref": "#/definitions/tostate" }
-	},
-	"required": [
-	    "tile",
-	    "name",
-	    "hand",
-	    "orientation"
+	    "controls",
+	    "panel",
+	    "track",
+	    "turnouts"
 	]
     }
 }
