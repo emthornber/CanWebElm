@@ -5,7 +5,6 @@ import CbusState
 import Dict
 import Html
 import Html.Attributes as HtmlA
-import Http
 import LayoutJson
 import Model
 import Tile
@@ -18,7 +17,7 @@ import Tile
 view : Model.Model -> Html.Html Model.Msg
 view model =
     Html.div [ HtmlA.class "content" ]
-        [ Html.h1 [] [ Html.text "CanWeb" ]
+        [ Html.h1 [] [ Html.text "canweb-elm" ]
         , Tile.view model
         , CbusState.view model
         ]
@@ -73,5 +72,5 @@ updateCBUS name cbus =
 
 
 subscriptions : Model.Model -> Sub Model.Msg
-subscriptions model =
+subscriptions _ =
     Sub.none

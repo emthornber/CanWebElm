@@ -8,7 +8,6 @@
 
 module Tile exposing (view)
 
-import Dict
 import Html
 import Html.Attributes as HtmlA
 import Model
@@ -20,7 +19,7 @@ import Svg.Attributes as SvgA
 view : Model.Model -> Html.Html Model.Msg
 view model =
     case model.layout of
-        Just layout ->
+        Just _ ->
             viewLayout model
 
         Nothing ->
@@ -283,7 +282,7 @@ viewTrackCircuits layout cbus =
             List.filter
                 (\track ->
                     case track.state of
-                        Just state ->
+                        Just _ ->
                             True
 
                         Nothing ->
@@ -396,7 +395,7 @@ viewSpots layout cbus =
             List.filter
                 (\track ->
                     case track.spot of
-                        Just spot ->
+                        Just _ ->
                             True
 
                         Nothing ->
@@ -682,7 +681,7 @@ viewLevers layout cbus =
             List.filter
                 (\turnout ->
                     case turnout.state of
-                        Just spot ->
+                        Just _ ->
                             True
 
                         Nothing ->
@@ -700,7 +699,7 @@ viewLever cbus turnout =
                 Just value ->
                     Just (Tuple.first value)
 
-                Nothing ->
+                _ ->
                     Nothing
 
         getTOR : Maybe ( String, String ) -> Maybe String
@@ -709,7 +708,7 @@ viewLever cbus turnout =
                 Just value ->
                     Just (Tuple.second value)
 
-                Nothing ->
+                _ ->
                     Nothing
 
         status =
@@ -995,7 +994,7 @@ viewLamps switch cbus =
                 Just value ->
                     Just (Tuple.first value)
 
-                Nothing ->
+                _ ->
                     Nothing
 
         getLampR : Maybe ( String, String ) -> Maybe String
@@ -1004,7 +1003,7 @@ viewLamps switch cbus =
                 Just value ->
                     Just (Tuple.second value)
 
-                Nothing ->
+                _ ->
                     Nothing
 
         fill =

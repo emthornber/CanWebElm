@@ -11,7 +11,7 @@ import Panel
 fetchLayout : Cmd Model.Msg
 fetchLayout =
     Http.get
-        { url = "http://localhost:8000/cagdemo.json"
+        { url = "/cagdemo.json"
         , expect = Http.expectJson Model.LoadLayout modelDecoder
         }
 

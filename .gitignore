@@ -8,4 +8,10 @@ elm.js
 # Editing files
 **/*.swp
 
-index.html
+# Build directory
+dist/
+
+.parcel-cache/
+.pnp.*
+.yarn/
+yarn.lock

@@ -2,7 +2,6 @@ module Model exposing (..)
 
 import Dict
 import Http
-import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (..)
 import Panel
 
@@ -115,10 +114,10 @@ getOBState name cbus =
                         Just record ->
                             Just record
 
-                        Nothing ->
+                        _ ->
                             Nothing
 
-                Nothing ->
+                _ ->
                     Nothing
 
         getOneBit : Maybe CBUSState -> OneBit
@@ -144,10 +143,10 @@ setOBState cbus name newState =
                         Just record ->
                             Just record
 
-                        Nothing ->
+                        _ ->
                             Nothing
 
-                Nothing ->
+                _ ->
                     Nothing
 
         getOneBit : Maybe CBUSState -> OneBit
